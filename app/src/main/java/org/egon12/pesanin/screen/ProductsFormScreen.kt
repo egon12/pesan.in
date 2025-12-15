@@ -1,0 +1,272 @@
+package org.egon12.pesanin.screen
+
+// ProductFormScreen.kt
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.launch
+import org.egon12.pesanin.viewmodels.ProductUiState
+import org.egon12.pesanin.viewmodels.ProductViewModel
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ProductFormScreen(
+    productId: String?,
+    onBack: () -> Unit,
+    viewModel: ProductViewModel = hiltViewModel()
+) {
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    val product by viewModel.selectedProduct.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+
+    var shortName by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
+    var price by remember { mutableStateOf("") }
+    var nameError by remember { mutableStateOf<String?>(null) }
+    var priceError by remember { mutableStateOf<String?>(null) }
+
+    val nameFocusRequester = remember { FocusRequester() }
+
+    // Load product if editing
+    LaunchedEffect(productId) {
+        if (productId != null) {
+            // In a real app, you would fetch the product here
+            // For simplicity, we'll assume the product is already selected
+        }
+    }
+
+    // Update form when product loads
+    LaunchedEffect(product) {
+        product?.let {
+            name = it.name
+            price = it.price.toString()
+            nameFocusRequester.requestFocus()
+        }
+    }
+
+    // Handle UI State
+    LaunchedEffect(uiState) {
+        when (uiState) {
+            is ProductUiState.Success -> {
+                val message = (uiState as ProductUiState.Success).message
+                snackbarHostState.showSnackbar(message)
+                if (productId == null) {
+                    // Clear form for new product
+                    name = ""
+                    price = ""
+                    nameError = null
+                    priceError = null
+                    nameFocusRequester.requestFocus()
+                }
+            }
+            is ProductUiState.Error -> {
+                val message = (uiState as ProductUiState.Error).message
+                snackbarHostState.showSnackbar(message)
+            }
+            else -> {}
+        }
+    }
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        if (productId == null) "Add Product"
+                        else "Edit Product"
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            // Product Name
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "Product Name",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = {
+                            name = it
+                            nameError = null
+                        },
+                        label = { Text("Enter product name") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(nameFocusRequester),
+                        singleLine = true,
+                        isError = nameError != null,
+                        supportingText = {
+                            if (nameError != null) {
+                                Text(nameError!!)
+                            }
+                        },
+                        leadingIcon = {
+                            //Icon(Icons.Default.Inventory, contentDescription = null)
+                            Icon(Icons.Default.AccountBox, contentDescription = null)
+                        }
+                    )
+                }
+            }
+
+            // Price
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "Price",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = price,
+                        onValueChange = {
+                            price = it
+                            priceError = null
+                        },
+                        label = { Text("Enter price") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        isError = priceError != null,
+                        supportingText = {
+                            if (priceError != null) {
+                                Text(priceError!!)
+                            }
+                        },
+                        leadingIcon = {
+                            //Icon(Icons.Default.AttachMoney, contentDescription = null)
+                            Icon(Icons.Default.AccountCircle, contentDescription = null)
+                        },
+                        prefix = { Text("₹") }
+                    )
+                }
+            }
+
+            // Summary
+            if (name.isNotBlank() && price.isNotBlank() && price.toDoubleOrNull() != null) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Text(
+                            text = "Summary",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("Product:")
+                            Text(name, style = MaterialTheme.typography.bodyLarge)
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("Price:")
+                            Text(
+                                "₹$price",
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Save Button
+            Button(
+                onClick = {
+                    // Validate
+                    var isValid = true
+
+                    if (name.isBlank()) {
+                        nameError = "Product name is required"
+                        isValid = false
+                    }
+
+                    val priceValue = price.toDoubleOrNull()
+                    if (priceValue == null || priceValue <= 0) {
+                        priceError = "Please enter a valid price"
+                        isValid = false
+                    }
+
+                    if (isValid) {
+                        scope.launch {
+                            if (productId == null) {
+                                viewModel.createProduct(shortName, name, price)
+                            } else {
+                                viewModel.updateProduct(productId, name, price)
+                            }
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                enabled = name.isNotBlank() && price.isNotBlank()
+            ) {
+                if (uiState is ProductUiState.Loading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else {
+                    Icon(
+                        //Icons.Default.Save,
+                        Icons.Default.PlayArrow,
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        if (productId == null) "Add Product"
+                        else "Update Product"
+                    )
+                }
+            }
+        }
+    }
+}

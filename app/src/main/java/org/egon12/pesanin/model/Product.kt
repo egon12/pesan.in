@@ -9,9 +9,6 @@ data class Product(
     @PrimaryKey
     val id: String = UUID.randomUUID().toString(),
     val name: String,
-    val description: String,
+    val shortName: String = "",
     val price: Double,
-    val category: String,
-    val imageUrl: String? = null,
-    val stock: Int = 0
 )
