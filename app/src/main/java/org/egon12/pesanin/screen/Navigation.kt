@@ -1,40 +1,32 @@
 package org.egon12.pesanin.screen
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material.icons.filled.Checklist
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PriceCheck
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.outlined.AddShoppingCart
 import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.PriceCheck
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import org.egon12.pesanin.viewmodels.MainViewModel
 
 @Composable
 fun PesaninNavHost(
@@ -50,11 +42,12 @@ fun PesaninNavHost(
         }
 
         composable(Screen.Product.route) {
-            ProductListScreen({}, {})
+            ProductListScreen(modifier, {})
         }
 
         composable(Screen.CreateProduct.route) {
             ProductFormScreen(
+                modifier,
                 productId = null,
             )
         }
@@ -65,60 +58,25 @@ fun PesaninNavHost(
 @Composable
 fun PesaninTopBar(
     navController: NavHostController,
-    onAddProduct: () -> Unit = {},
-    onImportCsv: () -> Unit = {}
+    onImportCsv: () -> Unit = {},
+    mainViewModel: MainViewModel = hiltViewModel(),
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    var showMenu by remember { mutableStateOf(false) }
 
     when (currentRoute) {
         Screen.Product.route -> {
-            TopAppBar(
-                title = { Text("Daftar Harga") },
-                actions = {
-                    IconButton(onClick = { /* Search */ }) {
-                        Icon(Icons.Default.Search, contentDescription = "Search")
-                    }
+            ProductListTopBar()
+        }
 
-                    Box {
-                        IconButton(onClick = { showMenu = true }) {
-                            Icon(Icons.Default.MoreVert, contentDescription = "Menu")
-                        }
-
-                        DropdownMenu(
-                            expanded = showMenu,
-                            onDismissRequest = { showMenu = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text("Tambah Produk") },
-                                onClick = {
-                                    showMenu = false
-                                    onAddProduct()
-                                },
-                                leadingIcon = {
-                                    Icon(Icons.Default.Add, contentDescription = null)
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Import CSV") },
-                                onClick = {
-                                    showMenu = false
-                                    onImportCsv()
-                                },
-                                leadingIcon = {
-                                    Icon(Icons.Default.Upload, contentDescription = null)
-                                }
-                            )
-                        }
-                    }
-                }
-            )
+        Screen.CreateProduct.route -> {
+            ProductFormTopBar()
         }
 
         Screen.CreateOrder.route -> {
             TopAppBar(title = { Text("Pesanan") })
         }
+
 
         // Add more routes as needed
     }
@@ -222,6 +180,14 @@ sealed class Screen(
         Screen(
             route = "product/create",
             title = "Tambah",
+            filledIcon = Icons.Default.PriceCheck,
+            outlinedIcon = Icons.Outlined.PriceCheck
+        )
+
+    object ImportCSVProduct :
+        Screen(
+            route = "product/import",
+            title = "Import CSV",
             filledIcon = Icons.Default.PriceCheck,
             outlinedIcon = Icons.Outlined.PriceCheck
         )

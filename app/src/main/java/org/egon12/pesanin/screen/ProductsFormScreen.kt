@@ -3,7 +3,6 @@ package org.egon12.pesanin.screen
 // ProductFormScreen.kt
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,19 +13,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -51,6 +47,7 @@ import org.egon12.pesanin.viewmodels.ProductViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductFormScreen(
+    modifier: Modifier,
     productId: String?,
     viewModel: ProductViewModel = hiltViewModel(),
     mainViewModel: MainViewModel = hiltViewModel(),
@@ -111,199 +108,203 @@ fun ProductFormScreen(
         }
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        if (productId == null) "Add Product"
-                        else "Edit Product"
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = mainViewModel::back) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
-                }
-            )
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        // Product Name
+        Card(
+            modifier = Modifier.fillMaxWidth()
         ) {
-            // Product Name
-            Card(
-                modifier = Modifier.fillMaxWidth()
+            Column(
+                modifier = Modifier.padding(16.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = "Product Name",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = name,
-                        onValueChange = {
-                            name = it
-                            nameError = null
-                        },
-                        label = { Text("Enter product name") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .focusRequester(nameFocusRequester),
-                        singleLine = true,
-                        isError = nameError != null,
-                        supportingText = {
-                            if (nameError != null) {
-                                Text(nameError!!)
-                            }
-                        },
-                        leadingIcon = {
-                            //Icon(Icons.Default.Inventory, contentDescription = null)
-                            Icon(Icons.Default.AccountBox, contentDescription = null)
+                Text(
+                    text = "Product Name",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = {
+                        name = it
+                        nameError = null
+                    },
+                    label = { Text("Enter product name") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(nameFocusRequester),
+                    singleLine = true,
+                    isError = nameError != null,
+                    supportingText = {
+                        if (nameError != null) {
+                            Text(nameError!!)
                         }
-                    )
-                }
+                    },
+                    leadingIcon = {
+                        //Icon(Icons.Default.Inventory, contentDescription = null)
+                        Icon(Icons.Default.AccountBox, contentDescription = null)
+                    }
+                )
             }
+        }
 
-            // Price
-            Card(
-                modifier = Modifier.fillMaxWidth()
+        // Price
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = "Price",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = price,
-                        onValueChange = {
-                            price = it
-                            priceError = null
-                        },
-                        label = { Text("Enter price") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        isError = priceError != null,
-                        supportingText = {
-                            if (priceError != null) {
-                                Text(priceError!!)
-                            }
-                        },
-                        leadingIcon = {
-                            //Icon(Icons.Default.AttachMoney, contentDescription = null)
-                            Icon(Icons.Default.AccountCircle, contentDescription = null)
-                        },
-                        prefix = { Text("₹") }
-                    )
-                }
-            }
-
-            // Summary
-            /*
-            if (name.isNotBlank() && price.isNotBlank() && price.toDoubleOrNull() != null) {
-                Card(
+                Text(
+                    text = "Price",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = price,
+                    onValueChange = {
+                        price = it
+                        priceError = null
+                    },
+                    label = { Text("Enter price") },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer
-                    )
+                    singleLine = true,
+                    isError = priceError != null,
+                    supportingText = {
+                        if (priceError != null) {
+                            Text(priceError!!)
+                        }
+                    },
+                    leadingIcon = {
+                        //Icon(Icons.Default.AttachMoney, contentDescription = null)
+                        Icon(Icons.Default.AccountCircle, contentDescription = null)
+                    },
+                    prefix = { Text("₹") }
+                )
+            }
+        }
+
+        // Summary
+        /*
+        if (name.isNotBlank() && price.isNotBlank() && price.toDoubleOrNull() != null) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
+                    Text(
+                        text = "Summary",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
+                        Text("Product:")
+                        Text(name, style = MaterialTheme.typography.bodyLarge)
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Price:")
                         Text(
-                            text = "Summary",
-                            style = MaterialTheme.typography.titleMedium
+                            "₹$price",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.primary
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text("Product:")
-                            Text(name, style = MaterialTheme.typography.bodyLarge)
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text("Price:")
-                            Text(
-                                "₹$price",
-                                style = MaterialTheme.typography.titleLarge,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
                     }
                 }
             }
+        }
 
-             */
+         */
 
-            // Save Button
-            Button(
-                onClick = {
-                    // Validate
-                    var isValid = true
+        // Save Button
+        Button(
+            onClick = {
+                // Validate
+                var isValid = true
 
-                    if (name.isBlank()) {
-                        nameError = "Product name is required"
-                        isValid = false
-                    }
+                if (name.isBlank()) {
+                    nameError = "Product name is required"
+                    isValid = false
+                }
 
-                    val priceValue = price.toDoubleOrNull()
-                    if (priceValue == null || priceValue <= 0) {
-                        priceError = "Please enter a valid price"
-                        isValid = false
-                    }
+                val priceValue = price.toDoubleOrNull()
+                if (priceValue == null || priceValue <= 0) {
+                    priceError = "Please enter a valid price"
+                    isValid = false
+                }
 
-                    if (isValid) {
-                        scope.launch {
-                            if (productId == null) {
-                                viewModel.createProduct(shortName, name, price)
-                            } else {
-                                viewModel.updateProduct(productId, name, price)
-                            }
+                if (isValid) {
+                    scope.launch {
+                        if (productId == null) {
+                            viewModel.createProduct(shortName, name, price)
+                        } else {
+                            viewModel.updateProduct(productId, name, price)
                         }
                     }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                enabled = name.isNotBlank() && price.isNotBlank()
-            ) {
-                if (uiState is ProductUiState.Loading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                } else {
-                    Icon(
-                        //Icons.Default.Save,
-                        Icons.Default.PlayArrow,
-                        contentDescription = null
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        if (productId == null) "Add Product"
-                        else "Update Product"
-                    )
                 }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            enabled = name.isNotBlank() && price.isNotBlank()
+        ) {
+            if (uiState is ProductUiState.Loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            } else {
+                Icon(
+                    //Icons.Default.Save,
+                    Icons.Default.PlayArrow,
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    if (productId == null) "Add Product"
+                    else "Update Product"
+                )
             }
         }
     }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ProductFormTopBar(
+    mainViewModel: MainViewModel = hiltViewModel()
+) {
+    TopAppBar(
+        title = {
+            Text(
+                "Tambah"
+                /*
+                if (productId == null) "Add Product"
+                else "Edit Product"
+                 */
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = mainViewModel::back) {
+                Icon(Icons.Default.ArrowBackIosNew, contentDescription = "Back")
+            }
+        }
+    )
 }

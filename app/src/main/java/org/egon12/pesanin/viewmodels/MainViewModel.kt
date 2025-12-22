@@ -21,6 +21,10 @@ class MainViewModel @Inject constructor() : ViewModel() {
     fun back() {
         emit(UiEvent.NavigateBack)
     }
+
+    fun navigate(screen: Screen) {
+        emit(UiEvent.Navigate(screen))
+    }
 }
 
 sealed class UiEvent {

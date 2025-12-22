@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -23,12 +24,16 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -65,7 +70,7 @@ import org.egon12.pesanin.viewmodels.UiEvent
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductListScreen(
-    onAddProduct: () -> Unit,
+    modifier: Modifier,
     onEditProduct: (String) -> Unit,
     viewModel: ProductViewModel = hiltViewModel()
 ) {
@@ -116,7 +121,7 @@ fun ProductListScreen(
     }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
     ) {
         // Search Bar
@@ -439,13 +444,45 @@ fun EmptyProductsView(
 fun ProductListTopBar(
     mainViewModel: MainViewModel = hiltViewModel()
 ) {
+    var showMenu by remember { mutableStateOf(false) }
+
     TopAppBar(
         title = { Text("Daftar Harga") },
         actions = {
-            IconButton(
-                onClick = { mainViewModel.emit(UiEvent.Navigate(Screen.CreateProduct)) }
-            ) {
-                Icon(Icons.Default.AddCircle, contentDescription = "Tambah Produk")
+            IconButton(onClick = { /* Search */ }) {
+                Icon(Icons.Default.Search, contentDescription = "Search")
+            }
+
+            Box {
+                IconButton(onClick = { showMenu = true }) {
+                    Icon(Icons.Default.MoreVert, contentDescription = "Menu")
+                }
+
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Tambah Produk") },
+                        onClick = {
+                            showMenu = false
+                            mainViewModel.navigate(Screen.CreateProduct)
+                        },
+                        leadingIcon = {
+                            Icon(Icons.Default.Add, contentDescription = null)
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Import CSV") },
+                        onClick = {
+                            showMenu = false
+                            mainViewModel.navigate(Screen.ImportCSVProduct)
+                        },
+                        leadingIcon = {
+                            Icon(Icons.Default.Upload, contentDescription = null)
+                        }
+                    )
+                }
             }
         }
     )
