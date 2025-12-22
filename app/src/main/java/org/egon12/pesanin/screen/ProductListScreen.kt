@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
@@ -33,8 +34,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -54,11 +53,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import org.egon12.pesanin.model.Product
+import org.egon12.pesanin.viewmodels.MainViewModel
 import org.egon12.pesanin.viewmodels.ProductUiState
 import org.egon12.pesanin.viewmodels.ProductViewModel
+import org.egon12.pesanin.viewmodels.UiEvent
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -114,96 +115,62 @@ fun ProductListScreen(
         }
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text("Products")
-                        if (products.isNotEmpty()) {
-                            Text(
-                                text = "${products.size} items",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                            )
-                        }
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { showImportDialog = true }) {
-                        Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Import")
-                    }
-                }
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onAddProduct,
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Product")
-            }
-        }
-    ) { paddingValues ->
-        Column(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        // Search Bar
+        Card(
             modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            elevation = CardDefaults.cardElevation(2.dp)
         ) {
-            // Search Bar
-            Card(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                elevation = CardDefaults.cardElevation(2.dp)
+                    .padding(horizontal = 12.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        Icons.Default.Search,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    TextField(
-                        value = searchQuery,
-                        onValueChange = viewModel::setSearchQuery,
-                        modifier = Modifier.weight(1f),
-                        placeholder = { Text("Search products...") },
-                        colors = TextFieldDefaults.colors(
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                            focusedContainerColor = MaterialTheme.colorScheme.surface
-                        ),
-                        singleLine = true
-                    )
-                }
-            }
-
-            if (products.isEmpty()) {
-                EmptyProductsView(
-                    onImportClick = { filePickerLauncher.launch(arrayOf("text/csv")) }
+                Icon(
+                    Icons.Default.Search,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
                 )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(8.dp)
-                ) {
-                    items(products, key = { it.id }) { product ->
-                        ProductItemCard(
-                            product = product,
-                            onClick = { onEditProduct(product.id) },
-                            onDelete = {
-                                selectedProductForDelete = product
-                                showDeleteDialog = true
-                            }
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                    }
+                Spacer(modifier = Modifier.width(8.dp))
+                TextField(
+                    value = searchQuery,
+                    onValueChange = viewModel::setSearchQuery,
+                    modifier = Modifier.weight(1f),
+                    placeholder = { Text("Search products...") },
+                    colors = TextFieldDefaults.colors(
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        focusedContainerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    singleLine = true
+                )
+            }
+        }
+
+        if (products.isEmpty()) {
+            EmptyProductsView(
+                onImportClick = { filePickerLauncher.launch(arrayOf("text/csv")) }
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(8.dp)
+            ) {
+                items(products, key = { it.id }) { product ->
+                    ProductItemCard(
+                        product = product,
+                        onClick = { onEditProduct(product.id) },
+                        onDelete = {
+                            selectedProductForDelete = product
+                            showDeleteDialog = true
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
                 }
             }
         }
@@ -464,5 +431,33 @@ fun EmptyProductsView(
             Spacer(modifier = Modifier.width(8.dp))
             Text("Import from CSV")
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ProductListTopBar(
+    mainViewModel: MainViewModel = hiltViewModel()
+) {
+    TopAppBar(
+        title = { Text("Daftar Harga") },
+        actions = {
+            IconButton(
+                onClick = { mainViewModel.emit(UiEvent.Navigate(Screen.CreateProduct)) }
+            ) {
+                Icon(Icons.Default.AddCircle, contentDescription = "Tambah Produk")
+            }
+        }
+    )
+}
+
+@Composable
+fun ProductListFAB(
+    mainViewModel: MainViewModel = hiltViewModel()
+) {
+    FloatingActionButton(
+        onClick = { mainViewModel.emit(UiEvent.Navigate(Screen.CreateProduct)) }
+    ) {
+        Icon(Icons.Default.Add, contentDescription = "Tambah Produk")
     }
 }
