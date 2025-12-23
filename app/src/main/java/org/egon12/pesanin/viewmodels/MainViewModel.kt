@@ -25,12 +25,16 @@ class MainViewModel @Inject constructor() : ViewModel() {
     fun navigate(screen: Screen) {
         emit(UiEvent.Navigate(screen))
     }
+
+    fun alert(msg: String) {
+        emit(UiEvent.Snackbar(msg))
+    }
 }
 
 sealed class UiEvent {
     data class Snackbar(val msg: String) : UiEvent()
     data class Navigate(val screen: Screen) : UiEvent()
-    object NavigateBack: UiEvent()
+    object NavigateBack : UiEvent()
 
-    object Idle:UiEvent()
+    object Idle : UiEvent()
 }

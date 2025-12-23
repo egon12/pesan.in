@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProductViewModel @Inject constructor(
-    private val repository: ProductRepository
+    private val repository: ProductRepository,
 ) : ViewModel() {
 
     private val _products = MutableStateFlow<List<Product>>(emptyList())
@@ -69,7 +69,7 @@ class ProductViewModel @Inject constructor(
                 return Result.failure(IllegalArgumentException("Invalid price"))
             }
 
-            val result = repository.createProduct(shortName, name, priceDouble)
+            val result = repository.createProduct(name, shortName, priceDouble)
 
             if (result.isSuccess) {
                 _uiState.value = ProductUiState.Success("Product added successfully")

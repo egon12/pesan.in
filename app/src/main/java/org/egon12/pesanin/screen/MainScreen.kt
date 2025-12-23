@@ -39,6 +39,7 @@ fun MainScreen(
         topBar = {
             PesaninTopBar(
                 navController,
+                viewModel,
             )
         },
         bottomBar = { PesaninNavBar(navController) }
@@ -46,6 +47,7 @@ fun MainScreen(
         PesaninNavHost(
             navController,
             modifier = Modifier.padding(innerPadding),
+            viewModel,
         )
     }
 }

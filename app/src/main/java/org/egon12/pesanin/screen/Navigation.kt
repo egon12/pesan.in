@@ -20,7 +20,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -31,7 +30,8 @@ import org.egon12.pesanin.viewmodels.MainViewModel
 @Composable
 fun PesaninNavHost(
     navController: NavHostController,
-    modifier: Modifier
+    modifier: Modifier,
+    viewModel: MainViewModel
 ) {
     NavHost(
         navController = navController,
@@ -48,6 +48,7 @@ fun PesaninNavHost(
         composable(Screen.CreateProduct.route) {
             ProductFormScreen(
                 modifier,
+                onError = { viewModel.alert(it) },
                 productId = null,
             )
         }
@@ -58,15 +59,17 @@ fun PesaninNavHost(
 @Composable
 fun PesaninTopBar(
     navController: NavHostController,
-    onImportCsv: () -> Unit = {},
-    mainViewModel: MainViewModel = hiltViewModel(),
+    mainViewModel: MainViewModel,
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
     when (currentRoute) {
         Screen.Product.route -> {
-            ProductListTopBar()
+            ProductListTopBar(
+                onNavigateToCreateProduct = { mainViewModel.navigate(Screen.CreateProduct) },
+                onNavigateToImportProduct = {},
+            )
         }
 
         Screen.CreateProduct.route -> {

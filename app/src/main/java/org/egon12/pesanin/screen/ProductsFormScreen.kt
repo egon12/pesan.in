@@ -11,10 +11,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Inventory
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -23,7 +22,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -39,6 +37,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import org.egon12.pesanin.viewmodels.MainViewModel
 import org.egon12.pesanin.viewmodels.ProductUiState
@@ -49,14 +48,13 @@ import org.egon12.pesanin.viewmodels.ProductViewModel
 fun ProductFormScreen(
     modifier: Modifier,
     productId: String?,
+    onError: (String) -> Unit,
     viewModel: ProductViewModel = hiltViewModel(),
-    mainViewModel: MainViewModel = hiltViewModel(),
 ) {
     val scope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
 
     val product by viewModel.selectedProduct.collectAsState()
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     var shortName by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
@@ -84,28 +82,25 @@ fun ProductFormScreen(
     }
 
     // Handle UI State
-    LaunchedEffect(uiState) {
-        when (uiState) {
-            is ProductUiState.Success -> {
-                val message = (uiState as ProductUiState.Success).message
-                snackbarHostState.showSnackbar(message)
-                if (productId == null) {
-                    // Clear form for new product
-                    name = ""
-                    price = ""
-                    nameError = null
-                    priceError = null
-                    nameFocusRequester.requestFocus()
-                }
+    when (uiState) {
+        is ProductUiState.Success -> {
+            val message = (uiState as ProductUiState.Success).message
+            if (productId == null) {
+                // Clear form for new product
+                name = ""
+                price = ""
+                nameError = null
+                priceError = null
+                nameFocusRequester.requestFocus()
             }
-
-            is ProductUiState.Error -> {
-                val message = (uiState as ProductUiState.Error).message
-                snackbarHostState.showSnackbar(message)
-            }
-
-            else -> {}
         }
+
+        is ProductUiState.Error -> {
+            val message = (uiState as ProductUiState.Error).message
+            onError(message)
+        }
+
+        else -> {}
     }
 
     Column(
@@ -122,9 +117,9 @@ fun ProductFormScreen(
                 modifier = Modifier.padding(16.dp)
             ) {
                 Text(
-                    text = "Product Name",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary
+                    "Tambah Produk",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
@@ -133,7 +128,7 @@ fun ProductFormScreen(
                         name = it
                         nameError = null
                     },
-                    label = { Text("Enter product name") },
+                    label = { Text("Nama") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .focusRequester(nameFocusRequester),
@@ -145,33 +140,38 @@ fun ProductFormScreen(
                         }
                     },
                     leadingIcon = {
-                        //Icon(Icons.Default.Inventory, contentDescription = null)
-                        Icon(Icons.Default.AccountBox, contentDescription = null)
+                        Icon(Icons.Default.Inventory, contentDescription = null)
                     }
                 )
-            }
-        }
 
-        // Price
-        Card(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text(
-                    text = "Price",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary
+                OutlinedTextField(
+                    value = shortName,
+                    onValueChange = {
+                        shortName = it
+                        nameError = null
+                    },
+                    label = { Text("Nama Pendek") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    isError = nameError != null,
+                    supportingText = {
+                        if (nameError != null) {
+                            Text(nameError!!)
+                        }
+                    },
+                    leadingIcon = {
+                        Icon(Icons.Default.Inventory, contentDescription = null)
+                    }
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+
+
                 OutlinedTextField(
                     value = price,
                     onValueChange = {
                         price = it
                         priceError = null
                     },
-                    label = { Text("Enter price") },
+                    label = { Text("Harga") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     isError = priceError != null,
@@ -181,10 +181,8 @@ fun ProductFormScreen(
                         }
                     },
                     leadingIcon = {
-                        //Icon(Icons.Default.AttachMoney, contentDescription = null)
-                        Icon(Icons.Default.AccountCircle, contentDescription = null)
+                        Text("Rp")
                     },
-                    prefix = { Text("₹") }
                 )
             }
         }
@@ -270,11 +268,7 @@ fun ProductFormScreen(
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             } else {
-                Icon(
-                    //Icons.Default.Save,
-                    Icons.Default.PlayArrow,
-                    contentDescription = null
-                )
+                Icon(Icons.Default.Save, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     if (productId == null) "Add Product"

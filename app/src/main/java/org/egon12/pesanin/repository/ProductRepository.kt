@@ -19,7 +19,7 @@ class ProductRepository @Inject constructor(
         }
 
         return try {
-            val product = Product(name = name.trim(), price = price, shortName = shortName)
+            val product = Product(name = name.trim(), price = price, shortName = shortName.trim())
             productDao.insertProduct(product)
             Result.success(product.id)
         } catch (e: Exception) {

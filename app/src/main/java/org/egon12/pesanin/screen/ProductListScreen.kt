@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -20,22 +19,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -44,9 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,10 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import org.egon12.pesanin.model.Product
-import org.egon12.pesanin.viewmodels.MainViewModel
-import org.egon12.pesanin.viewmodels.ProductUiState
 import org.egon12.pesanin.viewmodels.ProductViewModel
-import org.egon12.pesanin.viewmodels.UiEvent
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,7 +67,7 @@ fun ProductListScreen(
 
     val products by viewModel.products.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
-    val uiState by viewModel.uiState.collectAsState()
+    //val uiState by viewModel.uiState.collectAsState()
     val importResult by viewModel.importResult.collectAsState()
 
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -104,6 +91,7 @@ fun ProductListScreen(
     }
 
     // Handle UI State
+    /*
     LaunchedEffect(uiState) {
         when (uiState) {
             is ProductUiState.Success -> {
@@ -119,6 +107,8 @@ fun ProductListScreen(
             else -> {}
         }
     }
+
+     */
 
     Column(
         modifier = modifier
@@ -374,7 +364,7 @@ fun ProductItemCard(
             }
 
             Text(
-                text = "₹${product.price}",
+                text = "Rp${product.price}",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -439,62 +429,3 @@ fun EmptyProductsView(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ProductListTopBar(
-    mainViewModel: MainViewModel = hiltViewModel()
-) {
-    var showMenu by remember { mutableStateOf(false) }
-
-    TopAppBar(
-        title = { Text("Daftar Harga") },
-        actions = {
-            IconButton(onClick = { /* Search */ }) {
-                Icon(Icons.Default.Search, contentDescription = "Search")
-            }
-
-            Box {
-                IconButton(onClick = { showMenu = true }) {
-                    Icon(Icons.Default.MoreVert, contentDescription = "Menu")
-                }
-
-                DropdownMenu(
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Tambah Produk") },
-                        onClick = {
-                            showMenu = false
-                            mainViewModel.navigate(Screen.CreateProduct)
-                        },
-                        leadingIcon = {
-                            Icon(Icons.Default.Add, contentDescription = null)
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Import CSV") },
-                        onClick = {
-                            showMenu = false
-                            mainViewModel.navigate(Screen.ImportCSVProduct)
-                        },
-                        leadingIcon = {
-                            Icon(Icons.Default.Upload, contentDescription = null)
-                        }
-                    )
-                }
-            }
-        }
-    )
-}
-
-@Composable
-fun ProductListFAB(
-    mainViewModel: MainViewModel = hiltViewModel()
-) {
-    FloatingActionButton(
-        onClick = { mainViewModel.emit(UiEvent.Navigate(Screen.CreateProduct)) }
-    ) {
-        Icon(Icons.Default.Add, contentDescription = "Tambah Produk")
-    }
-}
