@@ -1,9 +1,13 @@
 package org.egon12.pesanin.screen
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -11,7 +15,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
@@ -36,6 +44,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -56,7 +66,7 @@ fun CreateOrderScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        CustomerCard(state)
+        CustomerCard(state, viewModel::setPhoneNumber)
         Spacer(modifier = Modifier.Companion.height(16.dp))
 
         // Products Selection
@@ -77,6 +87,26 @@ fun CreateOrderScreen(
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
+                }
+                LazyVerticalGrid(
+                    // 1. Define a fixed number of columns
+                    columns = GridCells.Fixed(3)
+                ) {
+                    // 2. Populate the grid with items
+                    items(state.products) { item ->
+                        Box(
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .aspectRatio(1f) // Makes the item a square
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color.LightGray)
+                                .clickable { viewModel.addProduct(item) },
+
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "${item.shortName}\n${item.price}")
+                        }
+                    }
                 }
             }
 
@@ -318,7 +348,7 @@ fun ProductSelectionDialog(
 @Composable
 fun CustomerCard(
     state: CreateOrderUiState,
-    viewModel: CreateOrderViewModel = hiltViewModel(),
+    onPhoneNumberChange: (String) -> Unit,
 ) {
     Card(
         modifier = Modifier.Companion.fillMaxWidth(),
@@ -335,7 +365,7 @@ fun CustomerCard(
 
             OutlinedTextField(
                 value = state.phoneNumber,
-                onValueChange = viewModel::setPhoneNumber,
+                onValueChange = onPhoneNumberChange,
                 label = { Text("No. Telp") },
                 modifier = Modifier.Companion.fillMaxWidth(),
                 singleLine = true,
