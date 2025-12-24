@@ -82,6 +82,22 @@ class CreateOrderViewModel @Inject constructor(
         }
     }
 
+    fun addItem(addedItem: Item) {
+        _uiState.update {
+            val index = it.items.indexOfFirst { item -> item.id == addedItem.id }
+            if (index < 0) {
+                return
+            }
+
+            val items = it.items.toMutableList()
+            val item = items[index]
+            items[index] = item.copy(qty = item.qty + 1)
+            items
+
+            it.copy(items = items)
+        }
+    }
+
     fun removeItem(removedItem: Item) {
         _uiState.update {
             val index = it.items.indexOfFirst { item -> item.id == removedItem.id }
@@ -100,6 +116,21 @@ class CreateOrderViewModel @Inject constructor(
                 items.removeAt(index)
                 items
             }
+
+            it.copy(items = items)
+        }
+    }
+
+    fun clearItem(item: Item) {
+        _uiState.update {
+            val index = it.items.indexOfFirst { it.id == item.id }
+
+            if (index < 0) {
+                return@update it
+            }
+
+            val items = it.items.toMutableList()
+            items.removeAt(index)
 
             it.copy(items = items)
         }
