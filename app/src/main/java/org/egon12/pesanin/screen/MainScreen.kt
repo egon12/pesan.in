@@ -24,7 +24,6 @@ fun MainScreen(
 
     LaunchedEffect(Unit) {
         viewModel.events.collect {
-            print(it)
             when (it) {
                 UiEvent.Idle -> {}
                 is UiEvent.Navigate -> navController.navigate(it.screen.route)

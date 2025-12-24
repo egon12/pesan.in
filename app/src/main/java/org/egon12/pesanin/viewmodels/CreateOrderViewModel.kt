@@ -63,6 +63,25 @@ class CreateOrderViewModel @Inject constructor(
         }
     }
 
+    fun removeProduct(product: Product) {
+        _uiState.update {
+            val index = it.items.indexOfFirst { item -> item.id == product.id }
+            if (index < 0) {
+                return;
+            }
+
+            val items = it.items.toMutableList()
+            val item = items[index]
+            if (item.qty > 1) {
+                items[index] = item.copy(qty = item.qty - 1)
+            } else {
+                items.removeAt(index)
+            }
+
+            it.copy(items = items)
+        }
+    }
+
     fun removeItem(removedItem: Item) {
         _uiState.update {
             val index = it.items.indexOfFirst { item -> item.id == removedItem.id }
@@ -126,6 +145,11 @@ data class CreateOrderUiState(
 ) {
     val isSaveEnabled: Boolean
         get() = phoneNumber.isNotEmpty() && items.isNotEmpty() && !isLoading;
+
+    fun qtyProduct(product: Product): Int {
+        val item = items.firstOrNull { item -> item.id == product.id } ?: return 0
+        return item.qty
+    }
 
     val totalAmount: Double
         get() = items.sumOf { it.totalPrice }

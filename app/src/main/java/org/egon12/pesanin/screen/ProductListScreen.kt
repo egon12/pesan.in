@@ -115,37 +115,20 @@ fun ProductListScreen(
             .fillMaxSize()
     ) {
         // Search Bar
-        Card(
+        TextField(
+            value = searchQuery,
+            onValueChange = viewModel::setSearchQuery,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            elevation = CardDefaults.cardElevation(2.dp)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    Icons.Default.Search,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                TextField(
-                    value = searchQuery,
-                    onValueChange = viewModel::setSearchQuery,
-                    modifier = Modifier.weight(1f),
-                    placeholder = { Text("Search products...") },
-                    colors = TextFieldDefaults.colors(
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                        focusedContainerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    singleLine = true
-                )
-            }
-        }
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            placeholder = { Text("Cari") },
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                focusedContainerColor = MaterialTheme.colorScheme.surface
+            ),
+            singleLine = true,
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) }
+        )
 
         if (products.isEmpty()) {
             EmptyProductsView(

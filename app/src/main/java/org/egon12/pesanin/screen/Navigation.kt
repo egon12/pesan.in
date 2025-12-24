@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.PriceCheck
+import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.AddShoppingCart
 import androidx.compose.material.icons.outlined.Checklist
@@ -11,6 +12,7 @@ import androidx.compose.material.icons.outlined.PriceCheck
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
@@ -77,7 +79,15 @@ fun PesaninTopBar(
         }
 
         Screen.CreateOrder.route -> {
-            TopAppBar(title = { Text("Pesanan") })
+            TopAppBar(
+                title = { Text("Pesanan Baru") },
+                actions = {
+                    IconButton(onClick = {}) {
+                        Icon( Icons.Default.RestartAlt, contentDescription = "Reset", )
+                    }
+
+                }
+            )
         }
 
 
