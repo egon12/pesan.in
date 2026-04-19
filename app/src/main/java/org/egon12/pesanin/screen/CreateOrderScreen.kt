@@ -11,33 +11,36 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -54,7 +57,7 @@ fun CreateOrderScreen(
     modifier: Modifier = Modifier,
     viewModel: CreateOrderViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle();
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LazyVerticalGrid(
         modifier = modifier
@@ -64,27 +67,35 @@ fun CreateOrderScreen(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        item(span = { GridItemSpan(maxLineSpan) }) {
-            CustomerPhoneNumber(state, viewModel::setPhoneNumber)
-        }
-
-        item(span = { GridItemSpan(maxLineSpan) }) {
-            Text(
-                text = "Pesanan",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-
         items(state.products) {
             ProductCard(it, state, viewModel)
         }
+    }
 
-        item(span = { GridItemSpan(maxLineSpan) }) {
+    if (state.showSummary) {
+        ReviewBottomSheet()
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ReviewBottomSheet(
+    viewModel: CreateOrderViewModel = hiltViewModel(),
+) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    ModalBottomSheet(
+        onDismissRequest = { viewModel.hideSummary() },
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 32.dp), // Extra padding for the navigation bar area
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             Summary(state)
-        }
-
-        item(span = { GridItemSpan(maxLineSpan) }) {
+            CustomerName(state, viewModel::setCustomerName)
+            CustomerPhoneNumber(state, viewModel::setPhoneNumber)
             ActionButtons(state, viewModel)
         }
     }
@@ -92,7 +103,7 @@ fun CreateOrderScreen(
 
 @Composable
 fun OrderItemCard(
-    item: Item, onRemove: () -> Unit, onQuantityChange: (Int) -> Unit
+    item: Item
 ) {
     Row(
         modifier = Modifier.Companion
@@ -108,7 +119,7 @@ fun OrderItemCard(
                 text = item.name, style = MaterialTheme.typography.bodyLarge
             )
             Text(
-                text = "₹${item.price} each",
+                text = "@ Rp${item.price}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
@@ -116,52 +127,45 @@ fun OrderItemCard(
 
         // Quantity Selector
         Row(
-            verticalAlignment = Alignment.Companion.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            IconButton(
-                onClick = {
-                    if (item.qty > 1) {
-                        onQuantityChange(item.qty - 1)
-                    }
-                }, modifier = Modifier.Companion.size(32.dp)
-            ) {
-                Icon(Icons.Filled.Remove, contentDescription = "Decrease")
-            }
 
             Text(
                 text = item.qty.toString(),
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.Companion.width(24.dp)
+                modifier = Modifier.width(24.dp)
             )
 
-            IconButton(
-                onClick = {
-                    onQuantityChange(item.qty + 1)
-                }, modifier = Modifier.Companion.size(32.dp)
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Increase")
-            }
         }
 
         // Total and Remove
         Column(
-            horizontalAlignment = Alignment.Companion.End
+            horizontalAlignment = Alignment.End
         ) {
             Text(
                 text = formatter.format(item.totalPrice),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.primary
             )
-            IconButton(
-                onClick = onRemove, modifier = Modifier.Companion.size(24.dp)
-            ) {
-                Icon(Icons.Default.Close, contentDescription = "Remove")
-            }
         }
     }
 }
 
+
+@Composable
+fun CustomerName(
+    state: CreateOrderUiState,
+    onNameChange: (String) -> Unit,
+) {
+    OutlinedTextField(
+        value = state.customerName,
+        onValueChange = onNameChange,
+        label = { Text("Nama Pelanggan") },
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true,
+    )
+}
 
 @Composable
 fun CustomerPhoneNumber(
@@ -172,10 +176,11 @@ fun CustomerPhoneNumber(
         value = state.phoneNumber,
         onValueChange = onPhoneNumberChange,
         label = { Text("No. Telp Pelanggan") },
-        modifier = Modifier.Companion.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         singleLine = true,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
         leadingIcon = {
-            Icon(Icons.Default.Phone, contentDescription = "Phone")
+            Icon(Icons.Default.Phone, contentDescription = "Telepon")
         })
 }
 
@@ -222,31 +227,29 @@ fun ProductCard(product: Product, state: CreateOrderUiState, viewModel: CreateOr
 @Composable
 fun Summary(state: CreateOrderUiState) {
     Card(
-        modifier = Modifier.Companion.fillMaxWidth(), colors = CardDefaults.cardColors(
+        modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer
         )
     ) {
         Column(
-            modifier = Modifier.Companion.padding(16.dp)
+            modifier = Modifier.padding(16.dp)
         ) {
             state.items.forEach {
-                OrderItemCard(it, onRemove = {}, onQuantityChange = {})
+                OrderItemCard(it )
             }
             Row(
-                modifier = Modifier.Companion.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Total Items:", style = MaterialTheme.typography.bodyMedium)
+                Text("Jumlah barang:", style = MaterialTheme.typography.bodyMedium)
                 Text(
                     "${state.items.sumOf { it.qty }}", style = MaterialTheme.typography.bodyLarge
                 )
             }
-            Spacer(modifier = Modifier.Companion.height(4.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             Row(
-                modifier = Modifier.Companion.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Total Amount:", style = MaterialTheme.typography.bodyMedium)
+                Text("Total:", style = MaterialTheme.typography.bodyMedium)
                 Text(
                     formatter.format(state.totalAmount),
                     style = MaterialTheme.typography.headlineSmall,
@@ -261,30 +264,17 @@ fun Summary(state: CreateOrderUiState) {
 fun ActionButtons(state: CreateOrderUiState, viewModel: CreateOrderViewModel) {
 
     Row(
-        modifier = Modifier.Companion.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Button(
-            onClick = { viewModel.clearCart() },
-            modifier = Modifier.Companion.weight(1f),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.errorContainer,
-                contentColor = MaterialTheme.colorScheme.onErrorContainer
-            )
-        ) {
-            Icon(Icons.Default.Clear, contentDescription = null)
-            Text("Clear")
-        }
-
-        Button(
-            onClick = { }, modifier = Modifier.Companion.weight(2f), enabled = state.isSaveEnabled
+            onClick = { viewModel.sendInvoice() }, modifier = Modifier.weight(2f), enabled = state.isSaveEnabled
         ) {
             if (state.isLoading) {
                 CircularProgressIndicator(
-                    modifier = Modifier.Companion.size(20.dp), strokeWidth = 2.dp
+                    modifier = Modifier.size(20.dp), strokeWidth = 2.dp
                 )
             } else {
-                Icon(Icons.Default.Send, contentDescription = null)
+                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null)
                 Text("Send Invoice via WhatsApp")
             }
         }

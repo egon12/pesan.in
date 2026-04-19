@@ -1,18 +1,35 @@
 package org.egon12.pesanin.viewmodels
 
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.egon12.pesanin.model.Invoice
+import org.egon12.pesanin.model.Order
+import org.egon12.pesanin.model.OrderItem
 import org.egon12.pesanin.model.Product
 import org.egon12.pesanin.repository.OrderRepository
 import org.egon12.pesanin.repository.ProductRepository
+import org.egon12.pesanin.screen.formatter
 import java.util.Date
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -21,12 +38,15 @@ class CreateOrderViewModel @Inject constructor(
     private val productRepository: ProductRepository,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<CreateOrderUiState>(
+    private val _uiState = MutableStateFlow(
         CreateOrderUiState(
             isLoading = true,
         )
-    );
-    val uiState: StateFlow<CreateOrderUiState> = _uiState.asStateFlow();
+    )
+    val uiState: StateFlow<CreateOrderUiState> = _uiState.asStateFlow()
+
+    private val _sideEffect = MutableSharedFlow<CreateOrderSideEffect>()
+    val sideEffect = _sideEffect.asSharedFlow()
 
     init {
         viewModelScope.launch {
@@ -38,6 +58,10 @@ class CreateOrderViewModel @Inject constructor(
 
     fun setPhoneNumber(number: String) {
         _uiState.update { it.copy(phoneNumber = number) }
+    }
+
+    fun setCustomerName(name: String) {
+        _uiState.update { it.copy(customerName = name) }
     }
 
     fun addProduct(product: Product) {
@@ -67,7 +91,7 @@ class CreateOrderViewModel @Inject constructor(
         _uiState.update {
             val index = it.items.indexOfFirst { item -> item.id == product.id }
             if (index < 0) {
-                return;
+                return@update it
             }
 
             val items = it.items.toMutableList()
@@ -86,7 +110,7 @@ class CreateOrderViewModel @Inject constructor(
         _uiState.update {
             val index = it.items.indexOfFirst { item -> item.id == addedItem.id }
             if (index < 0) {
-                return
+                return@update it
             }
 
             val items = it.items.toMutableList()
@@ -139,14 +163,16 @@ class CreateOrderViewModel @Inject constructor(
 
     private fun formatInvoiceMessage(invoice: Invoice): String {
         val itemsText = invoice.items.joinToString("\n") { item ->
-            "${item.productName} x${item.quantity}: ₹${item.total}"
+            "${item.productName} x${item.quantity}: ${formatter.format(item.total)}"
         }
+
+        val dateFormat = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault())
 
         return """
             🧾 *INVOICE* 🧾
             
             Invoice: ${invoice.invoiceNumber}
-            Date: ${Date(invoice.invoiceDate)}
+            Date: ${dateFormat.format(Date(invoice.invoiceDate))}
             
             Customer: ${invoice.customerName}
             WhatsApp: ${invoice.whatsappNumber}
@@ -155,24 +181,82 @@ class CreateOrderViewModel @Inject constructor(
             $itemsText
             
             -----------------
-            Subtotal: ₹${invoice.subtotal}
-            Tax (10%): ₹${invoice.tax}
-            Total: ₹${invoice.totalAmount}
+            Subtotal: ${formatter.format(invoice.subtotal)}
+            Tax (10%): ${formatter.format(invoice.tax)}
+            Total: ${formatter.format(invoice.totalAmount)}
             
             Thank you for your order! 🎉
         """.trimIndent()
     }
 
+    fun sendInvoice() {
+        viewModelScope.launch {
+            val currentState = _uiState.value
+            if (!currentState.isSaveEnabled) return@launch
+
+            _uiState.update { it.copy(isLoading = true) }
+
+            try {
+                val orderId = UUID.randomUUID().toString()
+                val orderItems = currentState.items.map { item ->
+                    OrderItem(
+                        orderId = orderId,
+                        productId = item.id,
+                        productName = item.name,
+                        quantity = item.qty,
+                        price = item.price,
+                        total = item.totalPrice
+                    )
+                }
+                val order = Order(
+                    id = orderId,
+                    whatsappNumber = currentState.phoneNumber,
+                    customerName = currentState.customerName.ifBlank { "Pelanggan" },
+                    items = orderItems,
+                    totalAmount = currentState.totalAmount
+                )
+
+                repository.createOrder(order, orderItems)
+                val invoice = repository.generateInvoice(order)
+                val message = formatInvoiceMessage(invoice)
+
+                _sideEffect.emit(CreateOrderSideEffect.OpenWhatsApp(invoice.whatsappNumber, message))
+
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        items = emptyList(),
+                        showSummary = false,
+                        phoneNumber = "",
+                        customerName = ""
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false) }
+            }
+        }
+    }
+
     fun clearCart() {
         _uiState.update { it.copy(items = emptyList()) }
+    }
+
+    fun showSummary() {
+        _uiState.update { it.copy(showSummary = true) }
+    }
+
+    fun hideSummary() {
+        _uiState.update { it.copy(showSummary = false) }
     }
 }
 
 data class CreateOrderUiState(
     val isLoading: Boolean = true,
     val phoneNumber: String = "",
+    val customerName: String = "",
     val items: List<Item> = emptyList(),
     val products: List<Product> = emptyList(),
+    val showSummary: Boolean = false,
 ) {
     val isSaveEnabled: Boolean
         get() = phoneNumber.isNotEmpty() && items.isNotEmpty() && !isLoading;
@@ -186,6 +270,10 @@ data class CreateOrderUiState(
         get() = items.sumOf { it.totalPrice }
 }
 
+sealed class CreateOrderSideEffect {
+    data class OpenWhatsApp(val phoneNumber: String, val message: String) : CreateOrderSideEffect()
+}
+
 data class Item(
     val id: String,
     val shortName: String,
@@ -195,4 +283,23 @@ data class Item(
 ) {
     val totalPrice: Double
         get() = qty * price
+}
+
+@Composable
+fun CartFab(
+    itemCount: Int,
+    total: Double,
+    onClick: () -> Unit,
+) {
+    if (itemCount == 0) return
+
+    ExtendedFloatingActionButton(
+        onClick = onClick,
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
+    ) {
+        Icon(Icons.Default.ShoppingCart, contentDescription = null)
+        Spacer(Modifier.width(8.dp))
+        Text("$itemCount item  •  ${formatter.format(total)}")
+    }
 }

@@ -3,6 +3,7 @@ package org.egon12.pesanin.screen
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material.icons.filled.Checklist
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.PriceCheck
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Settings
@@ -27,6 +28,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import org.egon12.pesanin.viewmodels.CreateOrderViewModel
 import org.egon12.pesanin.viewmodels.MainViewModel
 
 @Composable
@@ -62,6 +64,7 @@ fun PesaninNavHost(
 fun PesaninTopBar(
     navController: NavHostController,
     mainViewModel: MainViewModel,
+    createOrderViewMode: CreateOrderViewModel?,
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -82,10 +85,9 @@ fun PesaninTopBar(
             TopAppBar(
                 title = { Text("Pesanan Baru") },
                 actions = {
-                    IconButton(onClick = {}) {
-                        Icon( Icons.Default.RestartAlt, contentDescription = "Reset", )
+                    IconButton(onClick = { createOrderViewMode?.clearCart() }) {
+                        Icon( Icons.Default.Clear, contentDescription = "Hapus semua", )
                     }
-
                 }
             )
         }
