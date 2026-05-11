@@ -5,7 +5,6 @@ import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.PriceCheck
-import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.AddShoppingCart
 import androidx.compose.material.icons.outlined.Checklist
@@ -23,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -30,8 +30,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import org.egon12.pesanin.viewmodels.CreateOrderViewModel
 import org.egon12.pesanin.viewmodels.MainViewModel
-
-import androidx.navigation.NavBackStackEntry
 
 fun NavHostController.getBackStackEntryOrNull(route: String): NavBackStackEntry? {
     return try {
@@ -57,6 +55,10 @@ fun PesaninNavHost(
 
         composable(Screen.Product.route) {
             ProductListScreen(modifier, {})
+        }
+
+        composable(Screen.Orders.route) {
+            OrdersScreen(modifier)
         }
 
         composable(Screen.CreateProduct.route) {
@@ -96,9 +98,15 @@ fun PesaninTopBar(
                 title = { Text("Pesanan Baru") },
                 actions = {
                     IconButton(onClick = { createOrderViewMode?.clearCart() }) {
-                        Icon( Icons.Default.Clear, contentDescription = "Hapus semua", )
+                        Icon(Icons.Default.Clear, contentDescription = "Hapus semua")
                     }
                 }
+            )
+        }
+
+        Screen.Orders.route -> {
+            TopAppBar(
+                title = { Text("Daftar Pesanan") }
             )
         }
 
