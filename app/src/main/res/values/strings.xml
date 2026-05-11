@@ -70,7 +70,16 @@
     <string name="invoice_whatsapp">WhatsApp: %1$s</string>
     <string name="invoice_items_header">BARANG:</string>
     <string name="invoice_subtotal">Subtotal: %1$s</string>
-    <string name="invoice_tax">Pajak (10%%): %1$s</string>
+    <string name="invoice_tax">Pajak (%1$s): %2$s</string>
     <string name="invoice_total">Total: %1$s</string>
     <string name="invoice_footer">Terima kasih atas pesanan Anda! 🎉</string>
+    <!-- Settings -->
+    <string name="setting_header_business">Profil Bisnis</string>
+    <string name="setting_business_name">Nama Toko</string>
+    <string name="setting_business_phone">Nomor WhatsApp</string>
+    <string name="setting_header_order">Pengaturan Pesanan</string>
+    <string name="setting_tax_percentage">Persentase Pajak (%)</string>
+    <string name="setting_header_app">Aplikasi</string>
+    <string name="setting_language">Bahasa</string>
+    <string name="setting_version">Versi</string>
 </resources>

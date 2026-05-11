@@ -70,7 +70,16 @@
     <string name="invoice_whatsapp">WhatsApp: %1$s</string>
     <string name="invoice_items_header">ITEMS:</string>
     <string name="invoice_subtotal">Subtotal: %1$s</string>
-    <string name="invoice_tax">Tax (10%%): %1$s</string>
+    <string name="invoice_tax">Tax (%1$s): %2$s</string>
     <string name="invoice_total">Total: %1$s</string>
     <string name="invoice_footer">Thank you for your order! 🎉</string>
+    <!-- Settings -->
+    <string name="setting_header_business">Business Profile</string>
+    <string name="setting_business_name">Shop Name</string>
+    <string name="setting_business_phone">WhatsApp Number</string>
+    <string name="setting_header_order">Order Settings</string>
+    <string name="setting_tax_percentage">Tax Percentage (%)</string>
+    <string name="setting_header_app">Application</string>
+    <string name="setting_language">Language</string>
+    <string name="setting_version">Version</string>
 </resources>

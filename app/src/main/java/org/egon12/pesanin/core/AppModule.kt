@@ -34,13 +34,4 @@ object AppModule {
 
     @Provides
     fun provideOrderItemDao(database: AppDatabase): OrderItemDao = database.orderItemDao()
-
-    @Provides
-    fun provideRepository(
-        orderDao: OrderDao,
-        productDao: ProductDao,
-        orderItemDao: OrderItemDao,
-    ): OrderRepository {
-        return OrderRepository(orderDao, productDao, orderItemDao)
-    }
 }

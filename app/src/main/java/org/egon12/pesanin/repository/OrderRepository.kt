@@ -14,7 +14,8 @@ import javax.inject.Inject
 class OrderRepository @Inject constructor(
     private val orderDao: OrderDao,
     private val productDao: ProductDao,
-    private val orderItemDao: OrderItemDao
+    private val orderItemDao: OrderItemDao,
+    private val settingsRepository: SettingsRepository
 ) {
     suspend fun createOrder(order: Order, items: List<OrderItem>) {
         orderDao.insertOrder(order)
@@ -35,7 +36,8 @@ class OrderRepository @Inject constructor(
 
     suspend fun generateInvoice(order: Order): Invoice {
         val subtotal = order.items.sumOf { it.total }
-        val tax = subtotal * 0.10 // 10% tax
+        val taxRate = settingsRepository.taxPercentage.value / 100.0
+        val tax = subtotal * taxRate
         val total = subtotal + tax
 
         return Invoice(

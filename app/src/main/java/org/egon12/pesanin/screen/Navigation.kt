@@ -63,6 +63,10 @@ fun PesaninNavHost(
             OrdersScreen(modifier)
         }
 
+        composable(Screen.Settings.route) {
+            SettingsScreen(modifier)
+        }
+
         composable(Screen.CreateProduct.route) {
             ProductFormScreen(
                 modifier,
@@ -109,6 +113,12 @@ fun PesaninTopBar(
         Screen.Orders.route -> {
             TopAppBar(
                 title = { Text(stringResource(R.string.title_orders_list)) }
+            )
+        }
+
+        Screen.Settings.route -> {
+            TopAppBar(
+                title = { Text(stringResource(R.string.nav_settings)) }
             )
         }
 

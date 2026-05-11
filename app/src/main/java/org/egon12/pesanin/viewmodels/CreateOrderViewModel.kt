@@ -26,6 +26,7 @@ import javax.inject.Inject
 class CreateOrderViewModel @Inject constructor(
     private val repository: OrderRepository,
     private val productRepository: ProductRepository,
+    private val settingsRepository: org.egon12.pesanin.repository.SettingsRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -133,7 +134,7 @@ class CreateOrderViewModel @Inject constructor(
             
             -----------------
             ${context.getString(R.string.invoice_subtotal, formatter.format(invoice.subtotal))}
-            ${context.getString(R.string.invoice_tax, formatter.format(invoice.tax))}
+            ${context.getString(R.string.invoice_tax, "${settingsRepository.taxPercentage.value}%", formatter.format(invoice.tax))}
             ${context.getString(R.string.invoice_total, formatter.format(invoice.totalAmount))}
             
             ${context.getString(R.string.invoice_footer)}
