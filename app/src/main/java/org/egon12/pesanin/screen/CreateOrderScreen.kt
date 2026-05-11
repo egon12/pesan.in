@@ -42,10 +42,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.egon12.pesanin.R
 import org.egon12.pesanin.model.Product
 import org.egon12.pesanin.util.openWhatsApp
 import org.egon12.pesanin.viewmodels.CreateOrderSideEffect
@@ -152,12 +154,12 @@ fun ReviewBottomSheet(
             PesaninTextField(
                 value = state.customerName,
                 onValueChange = onNameChange,
-                label = "Nama Pelanggan"
+                label = stringResource(R.string.label_customer_name)
             )
             PesaninTextField(
                 value = state.phoneNumber,
                 onValueChange = onPhoneNumberChange,
-                label = "No. Telp Pelanggan",
+                label = stringResource(R.string.label_phone_number),
                 keyboardType = KeyboardType.Phone,
                 leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null) }
             )
@@ -263,13 +265,13 @@ fun ProductCard(
         ) {
             FilledTonalIconButton(onClick = onRemove) {
                 Icon(
-                    Icons.Default.Remove, contentDescription = "kurangi"
+                    Icons.Default.Remove, contentDescription = stringResource(R.string.action_minus)
                 )
             }
             Text(qty.toString())
             FilledIconButton(onClick = onAdd) {
                 Icon(
-                    Icons.Default.Add, contentDescription = "tambah"
+                    Icons.Default.Add, contentDescription = stringResource(R.string.action_plus)
                 )
             }
         }
@@ -312,7 +314,7 @@ fun Summary(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Jumlah barang:", style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.label_total_items), style = MaterialTheme.typography.bodyMedium)
                 Text("$totalQty", style = MaterialTheme.typography.bodyLarge)
             }
             Spacer(modifier = Modifier.height(4.dp))
@@ -320,7 +322,7 @@ fun Summary(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Total:", style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.label_total), style = MaterialTheme.typography.bodyMedium)
                 Text(
                     text = formatter.format(totalAmount),
                     style = MaterialTheme.typography.headlineSmall,
@@ -347,7 +349,7 @@ fun ActionButtons(
                 )
             } else {
                 Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null)
-                Text("Send Invoice via WhatsApp")
+                Text(stringResource(R.string.action_send_whatsapp))
             }
         }
     }

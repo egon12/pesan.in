@@ -35,10 +35,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
+import org.egon12.pesanin.R
 import org.egon12.pesanin.viewmodels.MainViewModel
 import org.egon12.pesanin.viewmodels.ProductUiState
 import org.egon12.pesanin.viewmodels.ProductViewModel
@@ -51,6 +55,7 @@ fun ProductFormScreen(
     onError: (String) -> Unit,
     viewModel: ProductViewModel = hiltViewModel(),
 ) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
     val product by viewModel.selectedProduct.collectAsState()
@@ -117,7 +122,7 @@ fun ProductFormScreen(
                 modifier = Modifier.padding(16.dp)
             ) {
                 Text(
-                    "Tambah Produk",
+                    stringResource(R.string.title_add_product),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                 )
@@ -128,7 +133,7 @@ fun ProductFormScreen(
                         name = it
                         nameError = null
                     },
-                    label = { Text("Nama") },
+                    label = { Text(stringResource(R.string.label_product_name)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .focusRequester(nameFocusRequester),
@@ -150,7 +155,7 @@ fun ProductFormScreen(
                         shortName = it
                         nameError = null
                     },
-                    label = { Text("Nama Pendek") },
+                    label = { Text(stringResource(R.string.label_short_name)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     isError = nameError != null,
@@ -171,7 +176,7 @@ fun ProductFormScreen(
                         price = it
                         priceError = null
                     },
-                    label = { Text("Harga") },
+                    label = { Text(stringResource(R.string.label_price)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     isError = priceError != null,
@@ -236,13 +241,13 @@ fun ProductFormScreen(
                 var isValid = true
 
                 if (name.isBlank()) {
-                    nameError = "Product name is required"
+                    nameError = context.getString(R.string.err_name_required)
                     isValid = false
                 }
 
                 val priceValue = price.toDoubleOrNull()
                 if (priceValue == null || priceValue <= 0) {
-                    priceError = "Please enter a valid price"
+                    priceError = context.getString(R.string.err_invalid_price)
                     isValid = false
                 }
 
@@ -271,8 +276,8 @@ fun ProductFormScreen(
                 Icon(Icons.Default.Save, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    if (productId == null) "Add Product"
-                    else "Update Product"
+                    if (productId == null) stringResource(R.string.action_add_product)
+                    else stringResource(R.string.action_update_product)
                 )
             }
         }
@@ -283,21 +288,19 @@ fun ProductFormScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductFormTopBar(
+    productId: String?,
     mainViewModel: MainViewModel = hiltViewModel()
 ) {
     TopAppBar(
         title = {
             Text(
-                "Tambah"
-                /*
-                if (productId == null) "Add Product"
-                else "Edit Product"
-                 */
+                if (productId == null) stringResource(R.string.title_add_product)
+                else stringResource(R.string.title_edit_product)
             )
         },
         navigationIcon = {
             IconButton(onClick = mainViewModel::back) {
-                Icon(Icons.Default.ArrowBackIosNew, contentDescription = "Back")
+                Icon(Icons.Default.ArrowBackIosNew, contentDescription = stringResource(R.string.action_back))
             }
         }
     )

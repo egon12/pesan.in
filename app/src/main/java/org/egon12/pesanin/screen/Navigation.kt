@@ -22,6 +22,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import org.egon12.pesanin.R
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -90,15 +92,15 @@ fun PesaninTopBar(
         }
 
         Screen.CreateProduct.route -> {
-            ProductFormTopBar()
+            ProductFormTopBar(productId = null)
         }
 
         Screen.CreateOrder.route -> {
             TopAppBar(
-                title = { Text("Pesanan Baru") },
+                title = { Text(stringResource(R.string.title_new_order)) },
                 actions = {
                     IconButton(onClick = { createOrderViewMode?.clearCart() }) {
-                        Icon(Icons.Default.Clear, contentDescription = "Hapus semua")
+                        Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.action_clear_all))
                     }
                 }
             )
@@ -106,7 +108,7 @@ fun PesaninTopBar(
 
         Screen.Orders.route -> {
             TopAppBar(
-                title = { Text("Daftar Pesanan") }
+                title = { Text(stringResource(R.string.title_orders_list)) }
             )
         }
 
@@ -137,10 +139,10 @@ fun PesaninNavBar(
                 icon = {
                     Icon(
                         imageVector = it.outlinedIcon,
-                        contentDescription = it.title,
+                        contentDescription = it.title(),
                     )
                 },
-                label = { Text(it.title) },
+                label = { Text(it.title()) },
                 selected = currentDestination?.route?.startsWith(it.route) == true,
                 onClick = {
                     navController.navigate(it.route) {
@@ -163,14 +165,17 @@ fun PesaninNavBar(
 
 sealed class Screen(
     val route: String,
-    val title: String,
+    val titleRes: Int,
     val filledIcon: ImageVector,
     val outlinedIcon: ImageVector,
 ) {
+    @Composable
+    fun title() = stringResource(titleRes)
+
     object CreateOrder :
         Screen(
             route = "createOrder",
-            title = "Pes. Baru",
+            titleRes = R.string.nav_create_order,
             filledIcon = Icons.Default.AddShoppingCart,
             outlinedIcon = Icons.Outlined.AddShoppingCart
         )
@@ -178,7 +183,7 @@ sealed class Screen(
     object Product :
         Screen(
             route = "products",
-            title = "Daftar Harga",
+            titleRes = R.string.nav_products,
             filledIcon = Icons.Default.PriceCheck,
             outlinedIcon = Icons.Outlined.PriceCheck
         )
@@ -186,7 +191,7 @@ sealed class Screen(
     object Orders :
         Screen(
             route = "orders",
-            title = "Pesanan",
+            titleRes = R.string.nav_orders,
             filledIcon = Icons.Default.Checklist,
             outlinedIcon = Icons.Outlined.Checklist,
         )
@@ -194,7 +199,7 @@ sealed class Screen(
     object Settings :
         Screen(
             route = "settings",
-            title = "Pengaturan",
+            titleRes = R.string.nav_settings,
             filledIcon = Icons.Default.Settings,
             outlinedIcon = Icons.Outlined.Settings
         )
@@ -212,7 +217,7 @@ sealed class Screen(
     object CreateProduct :
         Screen(
             route = "product/create",
-            title = "Tambah",
+            titleRes = R.string.title_add_product,
             filledIcon = Icons.Default.PriceCheck,
             outlinedIcon = Icons.Outlined.PriceCheck
         )
@@ -220,7 +225,7 @@ sealed class Screen(
     object ImportCSVProduct :
         Screen(
             route = "product/import",
-            title = "Import CSV",
+            titleRes = R.string.action_import_csv,
             filledIcon = Icons.Default.PriceCheck,
             outlinedIcon = Icons.Outlined.PriceCheck
         )

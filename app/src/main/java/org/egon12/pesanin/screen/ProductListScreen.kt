@@ -50,6 +50,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
+import org.egon12.pesanin.R
 import org.egon12.pesanin.model.Product
 import org.egon12.pesanin.viewmodels.ProductViewModel
 
@@ -121,7 +123,7 @@ fun ProductListScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp, vertical = 4.dp),
-            placeholder = { Text("Cari") },
+            placeholder = { Text(stringResource(R.string.label_search)) },
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                 focusedContainerColor = MaterialTheme.colorScheme.surface
@@ -158,9 +160,9 @@ fun ProductListScreen(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Product") },
+            title = { Text(stringResource(R.string.title_delete_product)) },
             text = {
-                Text("Are you sure you want to delete '${selectedProductForDelete?.name}'?")
+                Text(stringResource(R.string.msg_confirm_delete, selectedProductForDelete?.name ?: ""))
             },
             confirmButton = {
                 TextButton(
@@ -177,12 +179,12 @@ fun ProductListScreen(
                         contentColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Text("Delete")
+                    Text(stringResource(R.string.action_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.action_cancel))
                 }
             }
         )
@@ -192,12 +194,12 @@ fun ProductListScreen(
     if (showImportDialog) {
         AlertDialog(
             onDismissRequest = { showImportDialog = false },
-            title = { Text("Import Products") },
+            title = { Text(stringResource(R.string.title_import_products)) },
             text = {
                 Column {
-                    Text("Import products from CSV file.")
+                    Text(stringResource(R.string.msg_import_csv_desc))
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("CSV Format:", style = MaterialTheme.typography.titleSmall)
+                    Text(stringResource(R.string.msg_csv_format), style = MaterialTheme.typography.titleSmall)
                     Text("name,price")
                     Text("\"Product Name\",100.0")
                     Text("\"Another Product\",200.0")
@@ -210,12 +212,12 @@ fun ProductListScreen(
                         filePickerLauncher.launch(arrayOf("text/csv"))
                     }
                 ) {
-                    Text("Import CSV")
+                    Text(stringResource(R.string.action_import_csv))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showImportDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.action_cancel))
                 }
             }
         )
@@ -227,14 +229,14 @@ fun ProductListScreen(
             AlertDialog(
                 onDismissRequest = { viewModel.clearImportResult() },
                 title = {
-                    Text("Import Results")
+                    Text(stringResource(R.string.title_import_results))
                 },
                 text = {
                     Column {
-                        Text("Successfully imported: $successCount products")
+                        Text(stringResource(R.string.msg_import_success, successCount))
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            "Errors (${errors.size}):",
+                            stringResource(R.string.label_errors, errors.size),
                             style = MaterialTheme.typography.titleSmall
                         )
                         Spacer(modifier = Modifier.height(4.dp))
@@ -258,7 +260,7 @@ fun ProductListScreen(
                 },
                 confirmButton = {
                     TextButton(onClick = { viewModel.clearImportResult() }) {
-                        Text("OK")
+                        Text(stringResource(R.string.action_ok))
                     }
                 }
             )
@@ -269,10 +271,10 @@ fun ProductListScreen(
     if (showCSVTemplate) {
         AlertDialog(
             onDismissRequest = { showCSVTemplate = false },
-            title = { Text("CSV Template") },
+            title = { Text(stringResource(R.string.title_csv_template)) },
             text = {
                 Column {
-                    Text("Required format:", style = MaterialTheme.typography.titleSmall)
+                    Text(stringResource(R.string.msg_required_format), style = MaterialTheme.typography.titleSmall)
                     Spacer(modifier = Modifier.height(8.dp))
                     Card(
                         colors = CardDefaults.cardColors(
@@ -298,17 +300,17 @@ fun ProductListScreen(
                             val clip =
                                 android.content.ClipData.newPlainText("CSV Template", csvTemplate)
                             clipboard.setPrimaryClip(clip)
-                            snackbarHostState.showSnackbar("Template copied to clipboard")
+                            snackbarHostState.showSnackbar(context.getString(R.string.msg_template_copied))
                             showCSVTemplate = false
                         }
                     }
                 ) {
-                    Text("Copy Template")
+                    Text(stringResource(R.string.action_copy_template))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showCSVTemplate = false }) {
-                    Text("Close")
+                    Text(stringResource(R.string.action_close))
                 }
             }
         )
@@ -386,13 +388,13 @@ fun EmptyProductsView(
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "No products yet",
+            text = stringResource(R.string.msg_no_products),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Add your first product or import from CSV",
+            text = stringResource(R.string.msg_add_first_product),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -407,7 +409,7 @@ fun EmptyProductsView(
         ) {
             Icon(Icons.Default.KeyboardArrowUp, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Import from CSV")
+            Text(stringResource(R.string.action_import_csv))
         }
     }
 }

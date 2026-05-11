@@ -1,3 +1,76 @@
 <resources>
     <string name="app_name">Pesan.in</string>
+
+    <!-- Navigation -->
+    <string name="nav_create_order">Pes. Baru</string>
+    <string name="nav_products">Daftar Harga</string>
+    <string name="nav_orders">Pesanan</string>
+    <string name="nav_settings">Pengaturan</string>
+
+    <!-- Top Bar Titles -->
+    <string name="title_new_order">Pesanan Baru</string>
+    <string name="title_orders_list">Daftar Pesanan</string>
+    <string name="title_price_list">Daftar Harga</string>
+    <string name="title_add_product">Tambah Produk</string>
+    <string name="title_edit_product">Edit Produk</string>
+
+    <!-- Actions -->
+    <string name="action_clear_all">Hapus semua</string>
+    <string name="action_send_whatsapp">Kirim Tagihan via WhatsApp</string>
+    <string name="action_update_product">Simpan Perubahan</string>
+    <string name="action_add_product">Tambah Produk</string>
+    <string name="action_save">Simpan</string>
+    <string name="action_delete">Hapus</string>
+    <string name="action_cancel">Batal</string>
+    <string name="action_close">Tutup</string>
+    <string name="action_import_csv">Import dari CSV</string>
+    <string name="action_copy_template">Salin Template</string>
+    <string name="action_ok">OK</string>
+    <string name="action_minus">Kurangi</string>
+    <string name="action_plus">Tambah</string>
+    <string name="action_back">Kembali</string>
+
+    <!-- Labels -->
+    <string name="label_customer_name">Nama Pelanggan</string>
+    <string name="label_phone_number">No. Telp Pelanggan</string>
+    <string name="label_product_name">Nama Produk</string>
+    <string name="label_short_name">Nama Pendek</string>
+    <string name="label_price">Harga</string>
+    <string name="label_total_items">Jumlah barang</string>
+    <string name="label_total">Total</string>
+    <string name="label_search">Cari</string>
+    <string name="label_errors">Error (%1$d):</string>
+    <string name="label_wa">WA: %1$s</string>
+
+    <!-- Messages -->
+    <string name="msg_no_orders">Belum ada pesanan</string>
+    <string name="msg_no_products">Belum ada produk</string>
+    <string name="msg_add_first_product">Tambah produk pertama Anda atau import dari CSV</string>
+    <string name="msg_confirm_delete">Apakah Anda yakin ingin menghapus \'%1$s\'?</string>
+    <string name="placeholder_no_name">Tanpa Nama</string>
+    <string name="msg_import_csv_desc">Import produk dari file CSV.</string>
+    <string name="msg_csv_format">Format CSV:</string>
+    <string name="msg_import_success">Berhasil mengimport: %1$d produk</string>
+    <string name="msg_required_format">Format yang dibutuhkan:</string>
+    <string name="msg_template_copied">Template disalin ke clipboard</string>
+
+    <!-- Titles -->
+    <string name="title_delete_product">Hapus Produk</string>
+    <string name="title_import_products">Import Produk</string>
+    <string name="title_import_results">Hasil Import</string>
+    <string name="title_csv_template">Template CSV</string>
+
+    <!-- Errors -->
+    <string name="err_name_required">Nama produk wajib diisi</string>
+    <string name="err_invalid_price">Masukkan harga yang valid</string>
+    <!-- Invoice -->
+    <string name="invoice_header">🧾 *TAGIHAN* 🧾</string>
+    <string name="invoice_date">Tanggal: %1$s</string>
+    <string name="invoice_customer">Pelanggan: %1$s</string>
+    <string name="invoice_whatsapp">WhatsApp: %1$s</string>
+    <string name="invoice_items_header">BARANG:</string>
+    <string name="invoice_subtotal">Subtotal: %1$s</string>
+    <string name="invoice_tax">Pajak (10%%): %1$s</string>
+    <string name="invoice_total">Total: %1$s</string>
+    <string name="invoice_footer">Terima kasih atas pesanan Anda! 🎉</string>
 </resources>

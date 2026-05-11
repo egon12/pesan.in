@@ -19,6 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.compose.ui.res.stringResource
+import org.egon12.pesanin.R
 import org.egon12.pesanin.model.Order
 import org.egon12.pesanin.viewmodels.OrdersViewModel
 import java.text.SimpleDateFormat
@@ -38,7 +40,7 @@ fun OrdersScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = "Belum ada pesanan", style = MaterialTheme.typography.bodyLarge)
+            Text(text = stringResource(R.string.msg_no_orders), style = MaterialTheme.typography.bodyLarge)
         }
     } else {
         LazyColumn(
@@ -69,7 +71,7 @@ fun OrderCard(order: Order) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = order.customerName.ifBlank { "Tanpa Nama" },
+                    text = order.customerName.ifBlank { stringResource(R.string.placeholder_no_name) },
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )

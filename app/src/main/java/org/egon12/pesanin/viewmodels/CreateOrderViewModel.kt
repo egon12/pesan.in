@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.egon12.pesanin.R
 import org.egon12.pesanin.model.Invoice
 import org.egon12.pesanin.model.Order
 import org.egon12.pesanin.model.OrderItem
@@ -112,6 +113,7 @@ class CreateOrderViewModel @Inject constructor(
 
 
     private fun formatInvoiceMessage(invoice: Invoice): String {
+        val context = org.egon12.pesanin.PesaninApp.instance
         val itemsText = invoice.items.joinToString("\n") { item ->
             "${item.productName} x${item.quantity}: ${formatter.format(item.total)}"
         }
@@ -119,23 +121,22 @@ class CreateOrderViewModel @Inject constructor(
         val dateFormat = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault())
 
         return """
-            🧾 *INVOICE* 🧾
+            ${context.getString(R.string.invoice_header)}
             
-            Invoice: ${invoice.invoiceNumber}
-            Date: ${dateFormat.format(Date(invoice.invoiceDate))}
+            ${context.getString(R.string.invoice_date, dateFormat.format(Date(invoice.invoiceDate)))}
             
-            Customer: ${invoice.customerName}
-            WhatsApp: ${invoice.whatsappNumber}
+            ${context.getString(R.string.invoice_customer, invoice.customerName)}
+            ${context.getString(R.string.invoice_whatsapp, invoice.whatsappNumber)}
             
-            ITEMS:
+            ${context.getString(R.string.invoice_items_header)}
             $itemsText
             
             -----------------
-            Subtotal: ${formatter.format(invoice.subtotal)}
-            Tax (10%): ${formatter.format(invoice.tax)}
-            Total: ${formatter.format(invoice.totalAmount)}
+            ${context.getString(R.string.invoice_subtotal, formatter.format(invoice.subtotal))}
+            ${context.getString(R.string.invoice_tax, formatter.format(invoice.tax))}
+            ${context.getString(R.string.invoice_total, formatter.format(invoice.totalAmount))}
             
-            Thank you for your order! 🎉
+            ${context.getString(R.string.invoice_footer)}
         """.trimIndent()
     }
 
