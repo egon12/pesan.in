@@ -31,6 +31,16 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import org.egon12.pesanin.viewmodels.CreateOrderViewModel
 import org.egon12.pesanin.viewmodels.MainViewModel
 
+import androidx.navigation.NavBackStackEntry
+
+fun NavHostController.getBackStackEntryOrNull(route: String): NavBackStackEntry? {
+    return try {
+        getBackStackEntry(route)
+    } catch (_: Exception) {
+        null
+    }
+}
+
 @Composable
 fun PesaninNavHost(
     navController: NavHostController,

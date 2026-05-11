@@ -1,16 +1,5 @@
 package org.egon12.pesanin.viewmodels
 
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -100,45 +89,6 @@ class CreateOrderViewModel @Inject constructor(
                 items[index] = item.copy(qty = item.qty - 1)
             } else {
                 items.removeAt(index)
-            }
-
-            it.copy(items = items)
-        }
-    }
-
-    fun addItem(addedItem: Item) {
-        _uiState.update {
-            val index = it.items.indexOfFirst { item -> item.id == addedItem.id }
-            if (index < 0) {
-                return@update it
-            }
-
-            val items = it.items.toMutableList()
-            val item = items[index]
-            items[index] = item.copy(qty = item.qty + 1)
-            items
-
-            it.copy(items = items)
-        }
-    }
-
-    fun removeItem(removedItem: Item) {
-        _uiState.update {
-            val index = it.items.indexOfFirst { item -> item.id == removedItem.id }
-
-            if (index < 0) {
-                return@update it
-            }
-
-            val items = if (it.items[index].qty > 1) {
-                val items = it.items.toMutableList()
-                val item = items[index]
-                items[index] = item.copy(qty = item.qty - 1)
-                items
-            } else {
-                val items = it.items.toMutableList()
-                items.removeAt(index)
-                items
             }
 
             it.copy(items = items)
@@ -268,6 +218,9 @@ data class CreateOrderUiState(
 
     val totalAmount: Double
         get() = items.sumOf { it.totalPrice }
+
+    val totalQty: Int
+        get() = items.sumOf { it.qty }
 }
 
 sealed class CreateOrderSideEffect {
@@ -283,23 +236,4 @@ data class Item(
 ) {
     val totalPrice: Double
         get() = qty * price
-}
-
-@Composable
-fun CartFab(
-    itemCount: Int,
-    total: Double,
-    onClick: () -> Unit,
-) {
-    if (itemCount == 0) return
-
-    ExtendedFloatingActionButton(
-        onClick = onClick,
-        containerColor = MaterialTheme.colorScheme.primary,
-        contentColor = MaterialTheme.colorScheme.onPrimary,
-    ) {
-        Icon(Icons.Default.ShoppingCart, contentDescription = null)
-        Spacer(Modifier.width(8.dp))
-        Text("$itemCount item  •  ${formatter.format(total)}")
-    }
 }

@@ -1,7 +1,5 @@
 package org.egon12.pesanin.screen
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -12,13 +10,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import org.egon12.pesanin.viewmodels.CartFab
-import org.egon12.pesanin.viewmodels.CreateOrderSideEffect
 import org.egon12.pesanin.viewmodels.CreateOrderViewModel
 import org.egon12.pesanin.viewmodels.MainViewModel
 import org.egon12.pesanin.viewmodels.UiEvent
@@ -27,7 +22,6 @@ import org.egon12.pesanin.viewmodels.UiEvent
 fun MainScreen(
     viewModel: MainViewModel = hiltViewModel(),
 ) {
-    val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val navController = rememberNavController()
     val currentBackStack by navController.currentBackStackEntryAsState()
@@ -35,28 +29,10 @@ fun MainScreen(
 
     // Scoped to the nav graph so CreateOrderScreen shares this instance
     val navBackStackEntry = remember(currentBackStack) {
-        try {
-            navController.getBackStackEntry(Screen.CreateOrder.route)
-        } catch (_: Exception) {
-            null
-        }
+        navController.getBackStackEntryOrNull(Screen.CreateOrder.route)
     }
     val createOrderViewModel: CreateOrderViewModel? = navBackStackEntry?.let {
         hiltViewModel(it)
-    }
-    val createOrderState by createOrderViewModel?.uiState?.collectAsStateWithLifecycle()
-        ?: remember { mutableStateOf(null) }
-
-    LaunchedEffect(createOrderViewModel) {
-        createOrderViewModel?.sideEffect?.collect { effect ->
-            when (effect) {
-                is CreateOrderSideEffect.OpenWhatsApp -> {
-                    val uri = Uri.parse("https://api.whatsapp.com/send?phone=${effect.phoneNumber}&text=${Uri.encode(effect.message)}")
-                    val intent = Intent(Intent.ACTION_VIEW, uri)
-                    context.startActivity(intent)
-                }
-            }
-        }
     }
 
     LaunchedEffect(Unit) {
@@ -77,19 +53,30 @@ fun MainScreen(
         },
         bottomBar = { PesaninNavBar(navController) },
         floatingActionButton = {
-            if (currentRoute == Screen.CreateOrder.route) {
-                CartFab(
-                    itemCount = createOrderState?.items?.sumOf { it.qty } ?: 0,
-                    total = createOrderState?.totalAmount ?: 0.0,
-                    onClick = { createOrderViewModel?.showSummary() }
-                )
-            }
+            PesaninFAB(currentRoute, createOrderViewModel)
         }
     ) { innerPadding ->
         PesaninNavHost(
             navController,
             modifier = Modifier.padding(innerPadding),
             viewModel,
+        )
+    }
+}
+
+@Composable
+fun PesaninFAB(
+    currentRoute: String?,
+    createOrderViewModel: CreateOrderViewModel?
+) {
+    val createOrderState by createOrderViewModel?.uiState?.collectAsStateWithLifecycle()
+        ?: remember { mutableStateOf(null) }
+
+    if (currentRoute == Screen.CreateOrder.route) {
+        CartFab(
+            itemCount = createOrderState?.totalQty ?: 0,
+            total = createOrderState?.totalAmount ?: 0.0,
+            onClick = { createOrderViewModel?.showSummary() }
         )
     }
 }
