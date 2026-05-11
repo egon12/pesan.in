@@ -1,5 +1,8 @@
 package org.egon12.pesanin.screen
 
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material.icons.filled.Checklist
@@ -22,7 +25,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import org.egon12.pesanin.R
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -147,9 +152,10 @@ fun PesaninNavBar(
         bottomNavScreens.forEach {
             NavigationBarItem(
                 icon = {
-                    Icon(
-                        imageVector = it.outlinedIcon,
+                    Image(
+                        painter = painterResource(id = it.outlinedIcon),
                         contentDescription = it.title(),
+                        modifier = Modifier.size(36.dp)
                     )
                 },
                 label = { Text(it.title()) },
@@ -177,7 +183,7 @@ sealed class Screen(
     val route: String,
     val titleRes: Int,
     val filledIcon: ImageVector,
-    val outlinedIcon: ImageVector,
+    val outlinedIcon: Int,
 ) {
     @Composable
     fun title() = stringResource(titleRes)
@@ -187,7 +193,7 @@ sealed class Screen(
             route = "createOrder",
             titleRes = R.string.nav_create_order,
             filledIcon = Icons.Default.AddShoppingCart,
-            outlinedIcon = Icons.Outlined.AddShoppingCart
+            outlinedIcon = R.drawable.create_order_icon,
         )
 
     object Product :
@@ -195,7 +201,7 @@ sealed class Screen(
             route = "products",
             titleRes = R.string.nav_products,
             filledIcon = Icons.Default.PriceCheck,
-            outlinedIcon = Icons.Outlined.PriceCheck
+            outlinedIcon = R.drawable.price_list_icon
         )
 
     object Orders :
@@ -203,7 +209,7 @@ sealed class Screen(
             route = "orders",
             titleRes = R.string.nav_orders,
             filledIcon = Icons.Default.Checklist,
-            outlinedIcon = Icons.Outlined.Checklist,
+            outlinedIcon = R.drawable.orders_icon
         )
 
     object Settings :
@@ -211,7 +217,7 @@ sealed class Screen(
             route = "settings",
             titleRes = R.string.nav_settings,
             filledIcon = Icons.Default.Settings,
-            outlinedIcon = Icons.Outlined.Settings
+            outlinedIcon = R.drawable.settings_icon
         )
 
     companion object {
@@ -229,7 +235,7 @@ sealed class Screen(
             route = "product/create",
             titleRes = R.string.title_add_product,
             filledIcon = Icons.Default.PriceCheck,
-            outlinedIcon = Icons.Outlined.PriceCheck
+            outlinedIcon = R.drawable.price_list_icon,
         )
 
     object ImportCSVProduct :
@@ -237,6 +243,6 @@ sealed class Screen(
             route = "product/import",
             titleRes = R.string.action_import_csv,
             filledIcon = Icons.Default.PriceCheck,
-            outlinedIcon = Icons.Outlined.PriceCheck
+            outlinedIcon = R.drawable.price_list_icon,
         )
 }
