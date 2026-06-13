@@ -6,7 +6,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import org.egon12.pesanin.model.Order
+import org.egon12.pesanin.model.OrderStatus
 import org.egon12.pesanin.repository.OrderRepository
 import javax.inject.Inject
 
@@ -21,4 +23,10 @@ class OrdersViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
+
+    fun updateStatus(order: Order, status: OrderStatus) {
+        viewModelScope.launch {
+            orderRepository.updateOrderStatus(order.id, status)
+        }
+    }
 }

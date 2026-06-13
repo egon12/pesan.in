@@ -8,6 +8,7 @@ import org.egon12.pesanin.dao.ProductDao
 import org.egon12.pesanin.model.Invoice
 import org.egon12.pesanin.model.Order
 import org.egon12.pesanin.model.OrderItem
+import org.egon12.pesanin.model.OrderStatus
 import org.egon12.pesanin.model.Product
 import javax.inject.Inject
 
@@ -23,6 +24,11 @@ class OrderRepository @Inject constructor(
     }
 
     fun getAllOrders(): Flow<List<Order>> = orderDao.getAllOrders()
+
+    suspend fun updateOrderStatus(orderId: String, status: OrderStatus) {
+        val order = orderDao.getOrderById(orderId).firstOrNull() ?: return
+        orderDao.updateOrder(order.copy(status = status))
+    }
 
     suspend fun getOrderWithItems(orderId: String): Order? {
         val order = orderDao.getOrderById(orderId)

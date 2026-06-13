@@ -60,6 +60,14 @@
     <string name="title_import_results">Hasil Import</string>
     <string name="title_csv_template">Template CSV</string>
 
+    <!-- Order Status -->
+    <string name="status_pending">Menunggu</string>
+    <string name="status_confirmed">Dikonfirmasi</string>
+    <string name="status_processing">Diproses</string>
+    <string name="status_completed">Selesai</string>
+    <string name="status_cancelled">Dibatalkan</string>
+    <string name="action_change_status">Ubah Status</string>
+
     <!-- Errors -->
     <string name="err_name_required">Nama produk wajib diisi</string>
     <string name="err_invalid_price">Masukkan harga yang valid</string>
