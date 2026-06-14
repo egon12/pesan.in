@@ -65,7 +65,12 @@ fun PesaninNavHost(
         }
 
         composable(Screen.Orders.route) {
-            OrdersScreen(modifier)
+            OrdersScreen(modifier, navController)
+        }
+
+        composable("orderDetail/{orderId}") { backStackEntry ->
+            val orderId = backStackEntry.arguments?.getString("orderId") ?: return@composable
+            OrderDetailScreen(modifier, navController)
         }
 
         composable(Screen.Settings.route) {

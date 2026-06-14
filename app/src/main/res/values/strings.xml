@@ -10,6 +10,7 @@
     <!-- Top Bar Titles -->
     <string name="title_new_order">Pesanan Baru</string>
     <string name="title_orders_list">Daftar Pesanan</string>
+    <string name="title_order_detail">Detail Pesanan</string>
     <string name="title_price_list">Daftar Harga</string>
     <string name="title_add_product">Tambah Produk</string>
     <string name="title_edit_product">Edit Produk</string>
@@ -38,6 +39,7 @@
     <string name="label_price">Harga</string>
     <string name="label_total_items">Jumlah barang</string>
     <string name="label_total">Total</string>
+    <string name="label_order_items">Item Pesanan</string>
     <string name="label_search">Cari</string>
     <string name="label_errors">Error (%1$d):</string>
     <string name="label_wa">WA: %1$s</string>

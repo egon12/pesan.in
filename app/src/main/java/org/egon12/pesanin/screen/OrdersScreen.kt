@@ -1,5 +1,6 @@
 package org.egon12.pesanin.screen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.NavController
 import org.egon12.pesanin.R
 import org.egon12.pesanin.model.Order
 import org.egon12.pesanin.model.OrderStatus
@@ -42,6 +44,7 @@ import java.util.Locale
 @Composable
 fun OrdersScreen(
     modifier: Modifier = Modifier,
+    navController: NavController,
     viewModel: OrdersViewModel = hiltViewModel()
 ) {
     val orders by viewModel.orders.collectAsState()
@@ -62,7 +65,8 @@ fun OrdersScreen(
             items(orders) { order ->
                 OrderCard(
                     order = order,
-                    onStatusChange = { viewModel.updateStatus(order, it) }
+                    onStatusChange = { viewModel.updateStatus(order, it) },
+                    onOrderClick = { navController.navigate("orderDetail/${order.id}") }
                 )
             }
         }
@@ -70,13 +74,14 @@ fun OrdersScreen(
 }
 
 @Composable
-fun OrderCard(order: Order, onStatusChange: (OrderStatus) -> Unit) {
+fun OrderCard(order: Order, onStatusChange: (OrderStatus) -> Unit, onOrderClick: () -> Unit) {
     var menuExpanded by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp)
+            .clickable { onOrderClick() }
     ) {
         Column(
             modifier = Modifier
