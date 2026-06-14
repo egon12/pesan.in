@@ -248,7 +248,7 @@ fun ProductCard(
         horizontalAlignment = Alignment.Start,
         modifier = Modifier
             .border(
-                1.dp, MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(12.dp)
+                2.dp, MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(12.dp)
             )
             .padding(horizontal = 12.dp, vertical = 12.dp),
     ) {
