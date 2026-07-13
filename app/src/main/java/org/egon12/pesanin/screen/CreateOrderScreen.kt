@@ -58,6 +58,7 @@ import org.egon12.pesanin.viewmodels.Item
 @Composable
 fun CreateOrderScreen(
     modifier: Modifier = Modifier,
+    onOrderSaved: () -> Unit = {},
     viewModel: CreateOrderViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -68,6 +69,9 @@ fun CreateOrderScreen(
             when (effect) {
                 is CreateOrderSideEffect.OpenWhatsApp -> {
                     context.openWhatsApp(effect.phoneNumber, effect.message)
+                }
+                is CreateOrderSideEffect.OrderSaved -> {
+                    onOrderSaved()
                 }
             }
         }

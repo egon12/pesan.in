@@ -148,7 +148,7 @@ fun OrderCard(order: Order, onStatusChange: (OrderStatus) -> Unit, onOrderClick:
                     style = MaterialTheme.typography.bodySmall
                 )
                 Text(
-                    text = "Rp${order.totalAmount}",
+                    text = formatter.format(order.totalAmount),
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.secondary
                 )

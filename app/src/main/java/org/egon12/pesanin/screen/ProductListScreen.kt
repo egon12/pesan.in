@@ -54,6 +54,7 @@ import androidx.compose.ui.res.stringResource
 import org.egon12.pesanin.R
 import org.egon12.pesanin.model.Product
 import org.egon12.pesanin.viewmodels.ProductViewModel
+import org.egon12.pesanin.screen.formatter
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -349,7 +350,7 @@ fun ProductItemCard(
             }
 
             Text(
-                text = "Rp${product.price}",
+                text = formatter.format(product.price),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary
             )

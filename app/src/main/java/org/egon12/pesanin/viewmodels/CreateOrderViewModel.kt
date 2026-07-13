@@ -18,6 +18,7 @@ import org.egon12.pesanin.model.Product
 import org.egon12.pesanin.repository.OrderRepository
 import org.egon12.pesanin.repository.ProductRepository
 import org.egon12.pesanin.screen.formatter
+import org.egon12.pesanin.util.normalizePhone
 import java.util.Date
 import java.util.UUID
 import javax.inject.Inject
@@ -190,12 +191,6 @@ class CreateOrderViewModel @Inject constructor(
         }
     }
 
-    private fun normalizePhone(phone: String, countryCode: String): String = when {
-        phone.startsWith("+") -> phone
-        phone.startsWith("0") -> countryCode + phone.substring(1)
-        else -> countryCode + phone
-    }
-
     fun saveOrder() {
         viewModelScope.launch {
             val currentState = _uiState.value
@@ -234,6 +229,7 @@ class CreateOrderViewModel @Inject constructor(
                         customerName = ""
                     )
                 }
+                _sideEffect.emit(CreateOrderSideEffect.OrderSaved)
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false) }
             }
@@ -281,6 +277,7 @@ data class CreateOrderUiState(
 
 sealed class CreateOrderSideEffect {
     data class OpenWhatsApp(val phoneNumber: String, val message: String) : CreateOrderSideEffect()
+    object OrderSaved : CreateOrderSideEffect()
 }
 
 data class Item(

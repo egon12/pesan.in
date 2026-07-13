@@ -57,7 +57,11 @@ fun PesaninNavHost(
         startDestination = Screen.CreateOrder.route,
     ) {
         composable(Screen.CreateOrder.route) {
-            CreateOrderScreen(modifier)
+            val context = androidx.compose.ui.platform.LocalContext.current
+            CreateOrderScreen(
+                modifier,
+                onOrderSaved = { viewModel.alert(context.getString(R.string.msg_order_saved)) },
+            )
         }
 
         composable(Screen.Product.route) {
