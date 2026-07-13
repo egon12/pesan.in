@@ -85,6 +85,7 @@
     <string name="setting_header_business">Profil Bisnis</string>
     <string name="setting_business_name">Nama Toko</string>
     <string name="setting_business_phone">Nomor WhatsApp</string>
+    <string name="setting_country_code">Kode Negara (contoh: +62)</string>
     <string name="setting_header_order">Pengaturan Pesanan</string>
     <string name="setting_tax_percentage">Persentase Pajak (%)</string>
     <string name="setting_header_app">Aplikasi</string>

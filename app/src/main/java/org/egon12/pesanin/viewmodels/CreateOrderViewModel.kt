@@ -172,7 +172,8 @@ class CreateOrderViewModel @Inject constructor(
                 val invoice = repository.generateInvoice(order)
                 val message = formatInvoiceMessage(invoice)
 
-                _sideEffect.emit(CreateOrderSideEffect.OpenWhatsApp(invoice.whatsappNumber, message))
+                val phone = normalizePhone(invoice.whatsappNumber, settingsRepository.countryCode.value)
+                _sideEffect.emit(CreateOrderSideEffect.OpenWhatsApp(phone, message))
 
                 _uiState.update {
                     it.copy(
@@ -187,6 +188,12 @@ class CreateOrderViewModel @Inject constructor(
                 _uiState.update { it.copy(isLoading = false) }
             }
         }
+    }
+
+    private fun normalizePhone(phone: String, countryCode: String): String = when {
+        phone.startsWith("+") -> phone
+        phone.startsWith("0") -> countryCode + phone.substring(1)
+        else -> countryCode + phone
     }
 
     fun clearCart() {

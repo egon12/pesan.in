@@ -50,6 +50,12 @@ fun SettingsScreen(
                 label = stringResource(R.string.setting_business_phone),
                 keyboardType = KeyboardType.Phone
             )
+            SettingsTextField(
+                value = uiState.countryCode,
+                onValueChange = viewModel::setCountryCode,
+                label = stringResource(R.string.setting_country_code),
+                keyboardType = KeyboardType.Phone
+            )
         }
 
         /*

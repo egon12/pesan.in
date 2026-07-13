@@ -25,6 +25,9 @@ class SettingsRepository @Inject constructor(
     private val _taxPercentage = MutableStateFlow(prefs.getFloat(KEY_TAX_PERCENTAGE, 10f))
     val taxPercentage: StateFlow<Float> = _taxPercentage.asStateFlow()
 
+    private val _countryCode = MutableStateFlow(prefs.getString(KEY_COUNTRY_CODE, "+62") ?: "+62")
+    val countryCode: StateFlow<String> = _countryCode.asStateFlow()
+
     fun setShopName(name: String) {
         prefs.edit().putString(KEY_SHOP_NAME, name).apply()
         _shopName.value = name
@@ -40,9 +43,15 @@ class SettingsRepository @Inject constructor(
         _taxPercentage.value = percentage
     }
 
+    fun setCountryCode(code: String) {
+        prefs.edit().putString(KEY_COUNTRY_CODE, code).apply()
+        _countryCode.value = code
+    }
+
     companion object {
         private const val KEY_SHOP_NAME = "shop_name"
         private const val KEY_SHOP_PHONE = "shop_phone"
         private const val KEY_TAX_PERCENTAGE = "tax_percentage"
+        private const val KEY_COUNTRY_CODE = "country_code"
     }
 }

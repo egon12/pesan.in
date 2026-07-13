@@ -18,12 +18,14 @@ class SettingsViewModel @Inject constructor(
     val uiState: StateFlow<SettingsUiState> = combine(
         settingsRepository.shopName,
         settingsRepository.shopPhone,
-        settingsRepository.taxPercentage
-    ) { shopName, shopPhone, taxPercentage ->
+        settingsRepository.taxPercentage,
+        settingsRepository.countryCode,
+    ) { shopName, shopPhone, taxPercentage, countryCode ->
         SettingsUiState(
             shopName = shopName,
             shopPhone = shopPhone,
-            taxPercentage = taxPercentage.toString()
+            taxPercentage = taxPercentage.toString(),
+            countryCode = countryCode,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -43,10 +45,15 @@ class SettingsViewModel @Inject constructor(
         val percentage = percentageStr.toFloatOrNull() ?: 0f
         settingsRepository.setTaxPercentage(percentage)
     }
+
+    fun setCountryCode(code: String) {
+        settingsRepository.setCountryCode(code)
+    }
 }
 
 data class SettingsUiState(
     val shopName: String = "",
     val shopPhone: String = "",
-    val taxPercentage: String = "0"
+    val taxPercentage: String = "0",
+    val countryCode: String = "+62",
 )
