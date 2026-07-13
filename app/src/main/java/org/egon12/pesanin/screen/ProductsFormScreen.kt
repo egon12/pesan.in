@@ -53,6 +53,7 @@ fun ProductFormScreen(
     modifier: Modifier,
     productId: String?,
     onError: (String) -> Unit,
+    onSuccess: () -> Unit = {},
     viewModel: ProductViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -69,43 +70,40 @@ fun ProductFormScreen(
 
     val nameFocusRequester = remember { FocusRequester() }
 
-    // Load product if editing
     LaunchedEffect(productId) {
         if (productId != null) {
-            // In a real app, you would fetch the product here
-            // For simplicity, we'll assume the product is already selected
+            viewModel.loadProduct(productId)
         }
     }
 
-    // Update form when product loads
     LaunchedEffect(product) {
         product?.let {
             name = it.name
+            shortName = it.shortName
             price = it.price.toString()
             nameFocusRequester.requestFocus()
         }
     }
 
-    // Handle UI State
-    when (uiState) {
-        is ProductUiState.Success -> {
-            val message = (uiState as ProductUiState.Success).message
-            if (productId == null) {
-                // Clear form for new product
-                name = ""
-                price = ""
-                nameError = null
-                priceError = null
-                nameFocusRequester.requestFocus()
+    LaunchedEffect(uiState) {
+        when (uiState) {
+            is ProductUiState.Success -> {
+                if (productId == null) {
+                    name = ""
+                    shortName = ""
+                    price = ""
+                    nameError = null
+                    priceError = null
+                    nameFocusRequester.requestFocus()
+                } else {
+                    onSuccess()
+                }
             }
+            is ProductUiState.Error -> {
+                onError((uiState as ProductUiState.Error).message)
+            }
+            else -> {}
         }
-
-        is ProductUiState.Error -> {
-            val message = (uiState as ProductUiState.Error).message
-            onError(message)
-        }
-
-        else -> {}
     }
 
     Column(
@@ -256,7 +254,7 @@ fun ProductFormScreen(
                         if (productId == null) {
                             viewModel.createProduct(shortName, name, price)
                         } else {
-                            viewModel.updateProduct(productId, name, price)
+                            viewModel.updateProduct(productId, shortName, name, price)
                         }
                     }
                 }

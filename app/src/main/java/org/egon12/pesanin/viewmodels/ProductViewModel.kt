@@ -59,6 +59,14 @@ class ProductViewModel @Inject constructor(
         _selectedProduct.value = product
     }
 
+    fun loadProduct(productId: String) {
+        viewModelScope.launch {
+            repository.getProductById(productId).collect { product ->
+                _selectedProduct.value = product
+            }
+        }
+    }
+
     suspend fun createProduct(shortName: String, name: String, price: String): Result<String> {
         return try {
             _uiState.value = ProductUiState.Loading
@@ -86,7 +94,7 @@ class ProductViewModel @Inject constructor(
         }
     }
 
-    suspend fun updateProduct(productId: String, name: String, price: String): Result<Unit> {
+    suspend fun updateProduct(productId: String, shortName: String, name: String, price: String): Result<Unit> {
 
         return try {
             _uiState.value = ProductUiState.Loading
@@ -97,7 +105,7 @@ class ProductViewModel @Inject constructor(
                 throw IllegalArgumentException("Invalid price")
             }
 
-            val product = Product(id = productId, name = name, price = priceDouble)
+            val product = Product(id = productId, shortName = shortName, name = name, price = priceDouble)
             val result = repository.updateProduct(product)
 
             if (result.isSuccess) {

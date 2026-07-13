@@ -61,7 +61,9 @@ fun PesaninNavHost(
         }
 
         composable(Screen.Product.route) {
-            ProductListScreen(modifier, {})
+            ProductListScreen(modifier, onEditProduct = { productId ->
+                navController.navigate("product/edit/$productId")
+            })
         }
 
         composable(Screen.Orders.route) {
@@ -82,6 +84,16 @@ fun PesaninNavHost(
                 modifier,
                 onError = { viewModel.alert(it) },
                 productId = null,
+            )
+        }
+
+        composable(Screen.EditProduct.route) { backStackEntry ->
+            val productId = backStackEntry.arguments?.getString("productId") ?: return@composable
+            ProductFormScreen(
+                modifier,
+                productId = productId,
+                onError = { viewModel.alert(it) },
+                onSuccess = { navController.popBackStack() },
             )
         }
     }
@@ -107,6 +119,10 @@ fun PesaninTopBar(
 
         Screen.CreateProduct.route -> {
             ProductFormTopBar(productId = null)
+        }
+
+        Screen.EditProduct.route -> {
+            ProductFormTopBar(productId = navBackStackEntry?.arguments?.getString("productId"))
         }
 
         Screen.CreateOrder.route -> {
@@ -247,6 +263,14 @@ sealed class Screen(
         Screen(
             route = "product/import",
             titleRes = R.string.action_import_csv,
+            filledIcon = Icons.Default.PriceCheck,
+            outlinedIcon = R.drawable.price_list_icon,
+        )
+
+    object EditProduct :
+        Screen(
+            route = "product/edit/{productId}",
+            titleRes = R.string.title_edit_product,
             filledIcon = Icons.Default.PriceCheck,
             outlinedIcon = R.drawable.price_list_icon,
         )
