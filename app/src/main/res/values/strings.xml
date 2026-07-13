@@ -64,8 +64,6 @@
 
     <!-- Order Status -->
     <string name="status_pending">Menunggu</string>
-    <string name="status_confirmed">Dikonfirmasi</string>
-    <string name="status_processing">Diproses</string>
     <string name="status_completed">Selesai</string>
     <string name="status_cancelled">Dibatalkan</string>
     <string name="action_change_status">Ubah Status</string>

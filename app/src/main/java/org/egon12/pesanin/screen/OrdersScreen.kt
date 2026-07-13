@@ -160,17 +160,13 @@ fun OrderCard(order: Order, onStatusChange: (OrderStatus) -> Unit, onOrderClick:
 @Composable
 private fun OrderStatus.label(): String = when (this) {
     OrderStatus.PENDING -> stringResource(R.string.status_pending)
-    OrderStatus.CONFIRMED -> stringResource(R.string.status_confirmed)
-    OrderStatus.PROCESSING -> stringResource(R.string.status_processing)
     OrderStatus.COMPLETED -> stringResource(R.string.status_completed)
-    OrderStatus.CANCELLED -> stringResource(R.string.status_cancelled)
+    OrderStatus.CANCELED -> stringResource(R.string.status_cancelled)
 }
 
 @Composable
 private fun OrderStatus.color(): Color = when (this) {
     OrderStatus.PENDING -> MaterialTheme.colorScheme.onSurfaceVariant
-    OrderStatus.CONFIRMED -> MaterialTheme.colorScheme.primary
-    OrderStatus.PROCESSING -> MaterialTheme.colorScheme.tertiary
     OrderStatus.COMPLETED -> Color(0xFF2E7D32)
-    OrderStatus.CANCELLED -> MaterialTheme.colorScheme.error
+    OrderStatus.CANCELED -> MaterialTheme.colorScheme.error
 }

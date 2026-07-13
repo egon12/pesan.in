@@ -18,7 +18,7 @@ data class Order(
 )
 
 enum class OrderStatus {
-    PENDING, CONFIRMED, PROCESSING, COMPLETED, CANCELLED
+    PENDING, COMPLETED, CANCELED
 }
 
 @Entity(tableName = "order_items")
