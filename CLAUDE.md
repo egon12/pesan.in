@@ -27,25 +27,45 @@ app/src/main/java/org/egon12/pesanin/
 ├── core/          # Room AppDatabase, Hilt AppModule, TypeConverters
 ├── dao/           # Room DAOs (OrderDao, OrderItemDao, ProductDao)
 ├── model/         # Room entities (Order, OrderItem, Product, Invoice)
-├── repository/    # Data layer — Room repos + SettingsRepository (SharedPreferences)
+├── repository/    # Data layer — OrderRepository, ProductRepository, SettingsRepository
 ├── viewmodels/    # HiltViewModel classes; emit UiEvent via MutableSharedFlow
 ├── screen/        # Compose screens, Navigation.kt (Screen sealed class + NavHost)
+├── util/          # ContextExt.kt (openWhatsApp helper)
 └── ui/theme/      # Material 3 theme
 ```
 
 **Navigation:** `Screen` is a sealed class in `Navigation.kt` defining all routes. `MainScreen` hosts a `Scaffold` with `PesaninNavHost`, `PesaninTopBar`, `PesaninNavBar`, and `PesaninFAB`. Navigation events flow through `MainViewModel.events: MutableSharedFlow<UiEvent>`.
 
-**ViewModel → UI event bus:** `MainViewModel` emits `UiEvent` (Navigate, NavigateBack, Snackbar) collected in `MainScreen` via `LaunchedEffect`. Screens call `viewModel.navigate(Screen.X)` or `viewModel.alert(msg)` rather than controlling the nav controller directly. Screen-specific side effects use their own sealed classes (e.g., `CreateOrderSideEffect` for opening WhatsApp, `ProductUiState` for product CRUD feedback) — don't reuse the global `UiEvent` for these.
+The `orderDetail/{orderId}` route is a plain string route (not a `Screen` object) navigated to directly from `OrdersScreen` via `navController.navigate("orderDetail/${order.id}")`. `OrderDetailScreen` reads the orderId from `SavedStateHandle` via `OrderDetailViewModel`.
+
+**ViewModel → UI event bus:** `MainViewModel` emits `UiEvent` (Navigate, NavigateBack, Snackbar) collected in `MainScreen` via `LaunchedEffect`. Screens call `viewModel.navigate(Screen.X)` or `viewModel.alert(msg)` rather than controlling the nav controller directly. Screen-specific side effects use their own sealed classes (e.g., `CreateOrderSideEffect` for opening WhatsApp, `ProductUiState` for product CRUD feedback, `OrderDetailUiState` for Loading/Success/Error) — don't reuse the global `UiEvent` for these.
 
 **CreateOrderViewModel scoping:** `CreateOrderViewModel` is scoped to the `CreateOrder` nav back-stack entry so that `MainScreen` and `CreateOrderScreen` share the same instance. Access it via `hiltViewModel(navBackStackEntry)`.
 
 **Settings:** `SettingsRepository` uses `SharedPreferences` (not Room) for shop name, phone, and tax percentage, exposed as `StateFlow`.
 
-**`Invoice` model:** `Invoice` in `model/` is a plain data class (no `@Entity`) used as a DTO when generating a WhatsApp order message — it is never persisted to the database. It is built from `Order` + `OrderItem` data at send time.
+**`Invoice` model:** `Invoice` in `model/` is a plain data class (no `@Entity`) used as a DTO when generating a WhatsApp order message — it is never persisted to the database. It is built from `Order` + `OrderItem` data at send time via `OrderRepository.generateInvoice()`.
+
+**`Order` model:** `Order` has a `status: OrderStatus` field (enum: PENDING, CONFIRMED, PROCESSING, COMPLETED, CANCELLED). `Order.items: List<OrderItem>` is a non-persisted field populated at read time by `OrderRepository.getOrderWithItems()`. Status can be updated via `OrderRepository.updateOrderStatus()`.
+
+**`CommonComponents.kt`:** Shared composables and utilities used across screens. Contains `CartFab` (the extended FAB showing cart item count and total) and the `formatter` (`DecimalFormat("Rp#,###.##")`) used for currency display throughout the app.
+
+**`util/ContextExt.kt`:** `Context.openWhatsApp(phoneNumber, message)` launches the WhatsApp deep-link intent.
+
+## Screens
+
+| Screen | Route | ViewModel | Notes |
+|---|---|---|---|
+| CreateOrderScreen | `createOrder` | `CreateOrderViewModel` | Start destination; scoped to back-stack entry |
+| ProductListScreen | `products` | `ProductViewModel` | |
+| OrdersScreen | `orders` | `OrdersViewModel` | Tapping a card navigates to orderDetail |
+| OrderDetailScreen | `orderDetail/{orderId}` | `OrderDetailViewModel` | Not a `Screen` object; uses plain route string |
+| SettingsScreen | `settings` | `SettingsViewModel` | |
+| ProductFormScreen | `product/create` | — | `Screen.CreateProduct` |
 
 ## Adding a New Screen
 
-1. Add a `Screen` object in `Navigation.kt` (route, titleRes, icons)
+1. Add a `Screen` object in `Navigation.kt` (route, titleRes, icons) — unless the route has path params, in which case use a plain string route
 2. Add a `composable(Screen.X.route)` in `PesaninNavHost`
 3. Add a `TopAppBar` branch in `PesaninTopBar` if needed
 4. Add the screen to `PesaninNavBar` list if it's a bottom-nav destination
