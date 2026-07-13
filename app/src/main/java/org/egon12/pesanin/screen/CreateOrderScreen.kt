@@ -114,7 +114,8 @@ fun CreateOrderScreen(
             onRemoveItem = { item ->
                 state.products.find { it.id == item.id }?.let { viewModel.removeProduct(it) }
             },
-            onSend = viewModel::sendInvoice
+            onSend = viewModel::sendInvoice,
+            onSave = viewModel::saveOrder,
         )
     }
 }
@@ -129,6 +130,7 @@ fun ReviewBottomSheet(
     onAddItem: (Item) -> Unit,
     onRemoveItem: (Item) -> Unit,
     onSend: () -> Unit,
+    onSave: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
@@ -165,8 +167,10 @@ fun ReviewBottomSheet(
             )
             ActionButtons(
                 isLoading = state.isLoading,
-                isSaveEnabled = state.isSaveEnabled,
-                onSend = onSend
+                isSendEnabled = state.isSaveEnabled,
+                isSaveOnlyEnabled = state.isSaveOnlyEnabled,
+                onSend = onSend,
+                onSave = onSave,
             )
         }
     }
@@ -335,18 +339,29 @@ fun Summary(
 
 @Composable
 fun ActionButtons(
-    isLoading: Boolean, isSaveEnabled: Boolean, onSend: () -> Unit
+    isLoading: Boolean,
+    isSendEnabled: Boolean,
+    isSaveOnlyEnabled: Boolean,
+    onSend: () -> Unit,
+    onSave: () -> Unit,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Button(
-            onClick = onSend, modifier = Modifier.weight(2f), enabled = isSaveEnabled
+            onClick = onSave, modifier = Modifier.weight(1f), enabled = isSaveOnlyEnabled
         ) {
             if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp), strokeWidth = 2.dp
-                )
+                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+            } else {
+                Text(stringResource(R.string.action_save))
+            }
+        }
+        Button(
+            onClick = onSend, modifier = Modifier.weight(2f), enabled = isSendEnabled
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
             } else {
                 Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null)
                 Text(stringResource(R.string.action_send_whatsapp))

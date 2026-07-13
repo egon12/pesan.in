@@ -196,6 +196,50 @@ class CreateOrderViewModel @Inject constructor(
         else -> countryCode + phone
     }
 
+    fun saveOrder() {
+        viewModelScope.launch {
+            val currentState = _uiState.value
+            if (!currentState.isSaveOnlyEnabled) return@launch
+
+            _uiState.update { it.copy(isLoading = true) }
+
+            try {
+                val orderId = UUID.randomUUID().toString()
+                val orderItems = currentState.items.map { item ->
+                    OrderItem(
+                        orderId = orderId,
+                        productId = item.id,
+                        productName = item.name,
+                        quantity = item.qty,
+                        price = item.price,
+                        total = item.totalPrice
+                    )
+                }
+                val order = Order(
+                    id = orderId,
+                    whatsappNumber = currentState.phoneNumber,
+                    customerName = currentState.customerName.ifBlank { "Pelanggan" },
+                    items = orderItems,
+                    totalAmount = currentState.totalAmount
+                )
+
+                repository.createOrder(order, orderItems)
+
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        items = emptyList(),
+                        showSummary = false,
+                        phoneNumber = "",
+                        customerName = ""
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false) }
+            }
+        }
+    }
+
     fun clearCart() {
         _uiState.update { it.copy(items = emptyList()) }
     }
@@ -218,7 +262,10 @@ data class CreateOrderUiState(
     val showSummary: Boolean = false,
 ) {
     val isSaveEnabled: Boolean
-        get() = phoneNumber.isNotEmpty() && items.isNotEmpty() && !isLoading;
+        get() = phoneNumber.isNotEmpty() && items.isNotEmpty() && !isLoading
+
+    val isSaveOnlyEnabled: Boolean
+        get() = items.isNotEmpty() && !isLoading
 
     fun qtyProduct(product: Product): Int {
         val item = items.firstOrNull { item -> item.id == product.id } ?: return 0
