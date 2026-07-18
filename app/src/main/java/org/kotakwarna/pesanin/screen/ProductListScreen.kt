@@ -1,0 +1,417 @@
+package org.kotakwarna.pesanin.screen
+
+import android.content.Context
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
+import org.kotakwarna.pesanin.R
+import org.kotakwarna.pesanin.model.Product
+import org.kotakwarna.pesanin.viewmodels.ProductViewModel
+import org.kotakwarna.pesanin.screen.formatter
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ProductListScreen(
+    modifier: Modifier,
+    onEditProduct: (String) -> Unit,
+    viewModel: ProductViewModel = hiltViewModel()
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    val products by viewModel.products.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
+    //val uiState by viewModel.uiState.collectAsState()
+    val importResult by viewModel.importResult.collectAsState()
+
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var showImportDialog by remember { mutableStateOf(false) }
+    var selectedProductForDelete by remember { mutableStateOf<Product?>(null) }
+    var showCSVTemplate by remember { mutableStateOf(false) }
+
+    val filePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let {
+            scope.launch {
+                val content = context.contentResolver.openInputStream(it)?.use { stream ->
+                    stream.bufferedReader().readText()
+                }
+                content?.let { csvContent ->
+                    viewModel.importFromCSV(csvContent)
+                }
+            }
+        }
+    }
+
+    // Handle UI State
+    /*
+    LaunchedEffect(uiState) {
+        when (uiState) {
+            is ProductUiState.Success -> {
+                val message = (uiState as ProductUiState.Success).message
+                snackbarHostState.showSnackbar(message)
+            }
+
+            is ProductUiState.Error -> {
+                val message = (uiState as ProductUiState.Error).message
+                snackbarHostState.showSnackbar(message)
+            }
+
+            else -> {}
+        }
+    }
+
+     */
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+    ) {
+        // Search Bar
+        TextField(
+            value = searchQuery,
+            onValueChange = viewModel::setSearchQuery,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            placeholder = { Text(stringResource(R.string.label_search)) },
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                focusedContainerColor = MaterialTheme.colorScheme.surface
+            ),
+            singleLine = true,
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) }
+        )
+
+        if (products.isEmpty()) {
+            EmptyProductsView(
+                onImportClick = { filePickerLauncher.launch(arrayOf("text/csv")) }
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(8.dp)
+            ) {
+                items(products, key = { it.id }) { product ->
+                    ProductItemCard(
+                        product = product,
+                        onClick = { onEditProduct(product.id) },
+                        onDelete = {
+                            selectedProductForDelete = product
+                            showDeleteDialog = true
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+            }
+        }
+    }
+
+    // Delete Dialog
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text(stringResource(R.string.title_delete_product)) },
+            text = {
+                Text(stringResource(R.string.msg_confirm_delete, selectedProductForDelete?.name ?: ""))
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        scope.launch {
+                            selectedProductForDelete?.id?.let { productId ->
+                                viewModel.deleteProduct(productId)
+                            }
+                            showDeleteDialog = false
+                            selectedProductForDelete = null
+                        }
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text(stringResource(R.string.action_delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            }
+        )
+    }
+
+    // Import Options Dialog
+    if (showImportDialog) {
+        AlertDialog(
+            onDismissRequest = { showImportDialog = false },
+            title = { Text(stringResource(R.string.title_import_products)) },
+            text = {
+                Column {
+                    Text(stringResource(R.string.msg_import_csv_desc))
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(stringResource(R.string.msg_csv_format), style = MaterialTheme.typography.titleSmall)
+                    Text("name,price")
+                    Text("\"Product Name\",100.0")
+                    Text("\"Another Product\",200.0")
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showImportDialog = false
+                        filePickerLauncher.launch(arrayOf("text/csv"))
+                    }
+                ) {
+                    Text(stringResource(R.string.action_import_csv))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showImportDialog = false }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            }
+        )
+    }
+
+    // Show Import Errors Dialog if needed
+    importResult?.let { (successCount, errors) ->
+        if (errors.isNotEmpty()) {
+            AlertDialog(
+                onDismissRequest = { viewModel.clearImportResult() },
+                title = {
+                    Text(stringResource(R.string.title_import_results))
+                },
+                text = {
+                    Column {
+                        Text(stringResource(R.string.msg_import_success, successCount))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            stringResource(R.string.label_errors, errors.size),
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        LazyColumn(
+                            modifier = Modifier.heightIn(max = 200.dp)
+                        ) {
+                            items(errors.take(10)) { error ->
+                                Text(
+                                    text = "• $error",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                            if (errors.size > 10) {
+                                item {
+                                    Text("...and ${errors.size - 10} more errors")
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { viewModel.clearImportResult() }) {
+                        Text(stringResource(R.string.action_ok))
+                    }
+                }
+            )
+        }
+    }
+
+    // CSV Template Dialog
+    if (showCSVTemplate) {
+        AlertDialog(
+            onDismissRequest = { showCSVTemplate = false },
+            title = { Text(stringResource(R.string.title_csv_template)) },
+            text = {
+                Column {
+                    Text(stringResource(R.string.msg_required_format), style = MaterialTheme.typography.titleSmall)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    ) {
+                        Text(
+                            text = "name,price\n\"Product 1\",100.0\n\"Product 2\",200.0\n\"Product 3\",300.0",
+                            modifier = Modifier.padding(12.dp)
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        scope.launch {
+                            val csvTemplate =
+                                "name,price\n\"Product 1\",100.0\n\"Product 2\",200.0\n\"Product 3\",300.0"
+                            // Copy to clipboard
+                            val clipboard =
+                                context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                            val clip =
+                                android.content.ClipData.newPlainText("CSV Template", csvTemplate)
+                            clipboard.setPrimaryClip(clip)
+                            snackbarHostState.showSnackbar(context.getString(R.string.msg_template_copied))
+                            showCSVTemplate = false
+                        }
+                    }
+                ) {
+                    Text(stringResource(R.string.action_copy_template))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showCSVTemplate = false }) {
+                    Text(stringResource(R.string.action_close))
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun ProductItemCard(
+    product: Product,
+    onClick: () -> Unit,
+    onDelete: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = product.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            Text(
+                text = formatter.format(product.price),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            IconButton(
+                onClick = onDelete,
+                modifier = Modifier.size(32.dp)
+            ) {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun EmptyProductsView(
+    onImportClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            //Icons.Default.Inventory2,
+            Icons.Default.AccountBox,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = stringResource(R.string.msg_no_products),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = stringResource(R.string.msg_add_first_product),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        Button(
+            onClick = onImportClick,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+        ) {
+            Icon(Icons.Default.KeyboardArrowUp, contentDescription = null)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(stringResource(R.string.action_import_csv))
+        }
+    }
+}
+

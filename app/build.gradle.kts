@@ -6,13 +6,13 @@ plugins {
 }
 
 android {
-    namespace = "org.egon12.pesanin"
+    namespace = "org.kotakwarna.pesanin"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "org.egon12.pesanin"
+        applicationId = "org.kotakwarna.pesanin"
         minSdk = 24
         targetSdk = 36
         versionCode = 1

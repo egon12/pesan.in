@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Pesan.in is an Android ordering/inventory app (package `org.egon12.pesanin`) built with Kotlin, Jetpack Compose, Room, and Hilt.
+Pesan.in is an Android ordering/inventory app (package `org.kotakwarna.pesanin`) built with Kotlin, Jetpack Compose, Room, and Hilt.
 
 ## Build & Quality Commands
 
