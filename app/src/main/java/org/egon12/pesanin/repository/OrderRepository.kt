@@ -30,6 +30,12 @@ class OrderRepository @Inject constructor(
         orderDao.updateOrder(order.copy(status = status))
     }
 
+    suspend fun updateOrder(order: Order, items: List<OrderItem>) {
+        orderDao.updateOrder(order)
+        orderItemDao.deleteOrderItems(order.id)
+        orderItemDao.insertAllOrderItems(items)
+    }
+
     suspend fun getOrderWithItems(orderId: String): Order? {
         val order = orderDao.getOrderById(orderId)
         val items = orderItemDao.getOrderItems(orderId)
