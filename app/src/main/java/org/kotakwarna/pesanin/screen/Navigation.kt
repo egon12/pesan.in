@@ -87,6 +87,7 @@ fun PesaninNavHost(
             ProductFormScreen(
                 modifier,
                 onError = { viewModel.alert(it) },
+                onSuccess = { navController.popBackStack() },
                 productId = null,
             )
         }

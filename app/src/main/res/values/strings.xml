@@ -20,6 +20,8 @@
     <string name="action_send_whatsapp">Kirim Tagihan via WhatsApp</string>
     <string name="action_update_product">Simpan Perubahan</string>
     <string name="action_add_product">Tambah Produk</string>
+    <string name="action_save_and_add_another">Simpan &amp; Tambah Lagi</string>
+    <string name="action_save_and_done">Simpan &amp; Selesai</string>
     <string name="action_save">Simpan</string>
     <string name="action_delete">Hapus</string>
     <string name="action_cancel">Batal</string>

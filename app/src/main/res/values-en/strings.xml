@@ -19,6 +19,8 @@
     <string name="action_send_whatsapp">Send Invoice via WhatsApp</string>
     <string name="action_update_product">Update Product</string>
     <string name="action_add_product">Add Product</string>
+    <string name="action_save_and_add_another">Save &amp; Add Another</string>
+    <string name="action_save_and_done">Save &amp; Done</string>
     <string name="action_save">Save</string>
     <string name="action_delete">Delete</string>
     <string name="action_cancel">Cancel</string>

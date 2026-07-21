@@ -3,6 +3,7 @@ package org.kotakwarna.pesanin.screen
 // ProductFormScreen.kt
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,6 +22,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -67,6 +69,7 @@ fun ProductFormScreen(
     var price by remember { mutableStateOf("") }
     var nameError by remember { mutableStateOf<String?>(null) }
     var priceError by remember { mutableStateOf<String?>(null) }
+    var saveAndDone by remember { mutableStateOf(false) }
 
     val nameFocusRequester = remember { FocusRequester() }
 
@@ -88,7 +91,7 @@ fun ProductFormScreen(
     LaunchedEffect(uiState) {
         when (uiState) {
             is ProductUiState.Success -> {
-                if (productId == null) {
+                if (productId == null && !saveAndDone) {
                     name = ""
                     shortName = ""
                     price = ""
@@ -98,12 +101,28 @@ fun ProductFormScreen(
                 } else {
                     onSuccess()
                 }
+                saveAndDone = false
             }
             is ProductUiState.Error -> {
                 onError((uiState as ProductUiState.Error).message)
+                saveAndDone = false
             }
             else -> {}
         }
+    }
+
+    fun validateInputs(): Boolean {
+        var isValid = true
+        if (name.isBlank()) {
+            nameError = context.getString(R.string.err_name_required)
+            isValid = false
+        }
+        val priceValue = price.toDoubleOrNull()
+        if (priceValue == null || priceValue <= 0) {
+            priceError = context.getString(R.string.err_invalid_price)
+            isValid = false
+        }
+        return isValid
     }
 
     Column(
@@ -232,51 +251,75 @@ fun ProductFormScreen(
 
          */
 
-        // Save Button
-        Button(
-            onClick = {
-                // Validate
-                var isValid = true
+        val isLoading = uiState is ProductUiState.Loading
+        val formFilled = name.isNotBlank() && price.isNotBlank()
 
-                if (name.isBlank()) {
-                    nameError = context.getString(R.string.err_name_required)
-                    isValid = false
-                }
-
-                val priceValue = price.toDoubleOrNull()
-                if (priceValue == null || priceValue <= 0) {
-                    priceError = context.getString(R.string.err_invalid_price)
-                    isValid = false
-                }
-
-                if (isValid) {
-                    scope.launch {
-                        if (productId == null) {
-                            viewModel.createProduct(shortName, name, price)
-                        } else {
-                            viewModel.updateProduct(productId, shortName, name, price)
+        if (productId == null) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedButton(
+                    onClick = {
+                        if (validateInputs()) {
+                            saveAndDone = false
+                            scope.launch { viewModel.createProduct(shortName, name, price) }
                         }
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(56.dp),
+                    enabled = formFilled && !isLoading
+                ) {
+                    Text(stringResource(R.string.action_save_and_add_another))
+                }
+
+                Button(
+                    onClick = {
+                        if (validateInputs()) {
+                            saveAndDone = true
+                            scope.launch { viewModel.createProduct(shortName, name, price) }
+                        }
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(56.dp),
+                    enabled = formFilled && !isLoading
+                ) {
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    } else {
+                        Text(stringResource(R.string.action_save_and_done))
                     }
                 }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            enabled = name.isNotBlank() && price.isNotBlank()
-        ) {
-            if (uiState is ProductUiState.Loading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    strokeWidth = 2.dp,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            } else {
-                Icon(Icons.Default.Save, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    if (productId == null) stringResource(R.string.action_add_product)
-                    else stringResource(R.string.action_update_product)
-                )
+            }
+        } else {
+            Button(
+                onClick = {
+                    if (validateInputs()) {
+                        scope.launch { viewModel.updateProduct(productId, shortName, name, price) }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                enabled = formFilled && !isLoading
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else {
+                    Icon(Icons.Default.Save, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.action_update_product))
+                }
             }
         }
     }
